@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AYT Kimya Pro</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #f59e0b;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+    /* --- SIDEBAR (SOL MENÜ) --- */
+    .sidebar { width: 280px; background: #090d16; border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 20px 15px; }
+    .sidebar-logo { font-size: 1.4rem; color: var(--primary); font-weight: 700; margin-bottom: 30px; text-align: center; }
+    .topic-list { display: flex; flex-direction: column; gap: 8px; }
+    .topic-btn { background: transparent; color: var(--text-muted); border: 1px solid transparent; text-align: left; padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .topic-btn:hover { background: rgba(56, 189, 248, 0.05); color: var(--primary); }
+    .topic-btn.active { background: rgba(56, 189, 248, 0.15); border-color: var(--primary); color: var(--primary); }
+
+    /* Main Area Container */
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; }
+
+    /* Header & Navigation */
+    header { background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid var(--card-border); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 10; }
+    header h1 { font-size: 1.3rem; color: #fff; font-weight: 700; }
+    header h1 span { color: var(--primary); }
+    
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tab-btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; }
+    .tab-btn:hover, .tab-btn.active { background: var(--primary); color: #090d16; border-color: var(--primary); }
+
+    /* Main Content */
+    main { padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    /* Konu Bazlı İçerik Geçişi İçin */
+    .topic-notes { display: none; }
+    .topic-notes.active { display: block; }
+    .topic-sim { display: none; }
+    .topic-sim.active { display: block; }
+
+    /* Card Styling */
+    .section-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--card-border); padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+    .section-title { font-size: 1.2rem; color: var(--primary); margin-bottom: 16px; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; font-weight: 700; }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 15px; }
+    .info-box { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); border-radius: 8px; padding: 16px; }
+    .info-box h4 { color: var(--accent); margin-bottom: 8px; font-size: 0.95rem; }
+    .info-box p { font-size: 0.88rem; line-height: 1.5; color: var(--text-main); }
+
+    .osym-box { background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 15px 0; font-size: 0.9rem; line-height: 1.5; }
+    .osym-box strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(15, 23, 42, 0.4); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 0.88rem; }
+    th { background: rgba(56, 189, 248, 0.15); color: var(--primary); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Sim Panel */
+    .sim-panel { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--card-border); padding: 24px; }
+    .sim-select, .sim-input { padding: 10px 15px; border-radius: 8px; border: 1px solid var(--card-border); background: #0f172a; color: #fff; font-size: 0.95rem; outline: none; margin-bottom: 10px; width: 100%; max-width: 300px;}
+    .sim-btn { background: var(--primary); color: #090d16; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s;}
+    .sim-btn:hover { background: var(--primary-hover); color: white;}
+
+    /* Flashcards */
+    .flashcards-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .flashcard { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; height: 190px; cursor: pointer; perspective: 1000px; }
+    .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
+    .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .flashcard-front { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); }
+    .flashcard-back { background: #0f172a; color: var(--primary); transform: rotateY(180deg); border: 1px solid var(--primary); }
+
+    /* Quiz */
+    .quiz-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .quiz-question { font-weight: 600; font-size: 0.95rem; margin-bottom: 15px; line-height: 1.5;}
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn { padding: 12px 16px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: var(--text-main); text-align: left; cursor: pointer; transition: all 0.2s; font-size: 0.88rem; }
+    .option-btn:hover { background: var(--card-border); }
+    .option-btn.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green); color: var(--accent-green); }
+    .option-btn.incorrect { background: rgba(239, 68, 68, 0.2); border-color: var(--accent-red); color: var(--accent-red); }
+    .solution-box { margin-top: 15px; padding: 12px; border-radius: 6px; background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary); font-size: 0.85rem; display: none; }
+
+    .highlight-red { color: #f87171; font-weight: bold; }
+    .highlight-green { color: #4ade80; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <!-- SOL MENÜ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">⚛️ AYT Kimya Pro</div>
+    <div class="topic-list">
+      <!-- DİKKAT: onClick içindeki 'this' parametresi eklendi, artık geçişler sorunsuz çalışacak -->
+      <button class="topic-btn active" onclick="changeTopic('atom', 'Modern Atom Teorisi', this)">
+        <span>1.</span> Modern Atom Teorisi
+      </button>
+      <button class="topic-btn" onclick="changeTopic('gazlar', 'Gazlar', this)">
+        <span>2.</span> Gazlar
+      </button>
+      <button class="topic-btn" onclick="changeTopic('sivi', 'Sıvı Çözeltiler', this)">
+        <span>3.</span> Sıvı Çözeltiler
+      </button>
+      <button class="topic-btn" onclick="changeTopic('enerji', 'Kimyasal Tepkimelerde Enerji', this)">
+        <span>4.</span> Kimyasal Tepkimelerde Enerji
+      </button>
+    </div>
+  </aside>
+
+  <!-- ANA İÇERİK ALANI -->
+  <div class="main-wrapper">
+    <!-- Üst Sekmeler -->
+    <header>
+      <h1 id="headerTitle">Bölüm: <span>Modern Atom Teorisi</span></h1>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('notes-tab')">📘 Ders Notları</button>
+        <button class="tab-btn" onclick="switchTab('sim-tab')">⚙️ Simülatör</button>
+        <button class="tab-btn" onclick="switchTab('flashcards-tab')">🎴 Bilgi Kartları</button>
+        <button class="tab-btn" onclick="switchTab('quiz-tab')">📝 Soru Bankası</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- TAB 1: DERS NOTLARI -->
+      <div id="notes-tab" class="tab-content active">
+        
+        <!-- ============================================== -->
+        <!-- 1. KONU NOTLARI: ATOM (Senin BÖLÜM 1 - 7 Eksiksiz) -->
+        <!-- ============================================== -->
+        <div id="notes-atom" class="topic-notes active">
+          
+          <!-- BÖLÜM 1 -->
+          <div class="section-card">
+            <h3 class="section-title">🔹 BÖLÜM 1: Atom Temel Tanımları & Tanecik İlişkileri</h3>
+            <p>Elementlerin tüm kimyasal özelliklerini taşıyan en küçük yapı taşına <strong>atom</strong> denir. Çekirdek (proton + nötron) ve orbitallerdeki elektronlardan oluşur.</p>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>Proton (p<sup>+</sup>)</h4>
+                <p>Çekirdekte bulunur. Yükü +1, kütlesi ~ 1.6725 × 10<sup>-24</sup> g (1.0073 akb). Atomun kimliğini (Atom Numarası Z) belirler.</p>
+              </div>
+              <div class="info-box">
+                <h4>Nötron (n<sup>0</sup>)</h4>
+                <p>Çekirdekte bulunur. Yüksüzdür, kütlesi ~ 1.6749 × 10<sup>-24</sup> g (1.0082 akb). Kütle numarasını (A = p + n) etkiler.</p>
+              </div>
+              <div class="info-box">
+                <h4>Elektron (e<sup>-</sup>)</h4>
+                <p>Orbitallerde döner. Yükü -1, kütlesi protonun 1/1836'sı kadardır (~ 9.109 × 10<sup>-28</sup> g, kütlesi ihmal edilir).</p>
+              </div>
+            </div>
+            <div class="osym-box">
+              <strong>⭐ ÖSYM KRİTİK UYARI:</strong>
+              Çekirdeğin çekim gücü SADECE proton sayısına (Z) bağlıdır! Bir atom elektron aldığında veya verdiğinde çekirdeğin çekim gücü DEĞİŞMEZ. Değişen şey "elektron başına düşen çekim kuvveti"dir. Elektron aldıkça e<sup>-</sup> başına çekim azalır (çap büyür); elektron verdikçe e<sup>-</sup> başına çekim artar (çap küçülür).
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Kavram</th><th>Proton (p)</th><th>Nötron (n)</th><th>Elektron (e)</th><th>Kimyasal Özellik</th><th>Örnek / Not</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>İzotop</strong></td><td><span class="highlight-green">AYNI</span></td><td><span class="highlight-red">Farklı</span></td><td>Nötrse Aynı</td><td>Nötr iken AYNI, iyonken farklı</td><td><sub>1</sub><sup>1</sup>H, <sub>1</sub><sup>2</sup>D, <sub>1</sub><sup>3</sup>T</td></tr>
+                <tr><td><strong>İzoton</strong></td><td><span class="highlight-red">Farklı</span></td><td><span class="highlight-green">AYNI</span></td><td>Farklı</td><td>FARKLI</td><td><sub>11</sub><sup>23</sup>Na ile <sub>12</sub><sup>24</sup>Mg</td></tr>
+                <tr><td><strong>İzobar</strong></td><td><span class="highlight-red">Farklı</span></td><td>Farklı</td><td>Farklı (A Aynı)</td><td>FARKLI</td><td><sub>20</sub><sup>40</sup>Ca ile <sub>18</sub><sup>40</sup>Ar</td></tr>
+                <tr><td><strong>İzoelektronik</strong></td><td><span class="highlight-red">Farklı</span></td><td>Farklı</td><td><span class="highlight-green">AYNI (Sayı+Dizilim)</span></td><td>FARKLI</td><td><sub>9</sub>F<sup>-</sup>, <sub>10</sub>Ne, <sub>11</sub>Na<sup>+</sup></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- BÖLÜM 2 -->
+          <div class="section-card">
+            <h3 class="section-title">🔹 BÖLÜM 2: Atom Modellerinin Tarihsel Gelişimi ve Sınırlılıkları</h3>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>1. Dalton Atom Modeli (1803)</h4>
+                <p>• Maddenin en küçük yapı taşı bölünemez atomlardır.<br>• Atomlar içi dolu yüksüz kürelerdir.<br>• Bir elementin tüm atomları kütlece özdeştir.<br><strong>Eksiklikleri:</strong> İçi boşlukludur, alt tanecikler (p, n, e) vardır, izotop atomlar mevcuttur.</p>
+              </div>
+              <div class="info-box">
+                <h4>2. Thomson Atom Modeli (1904)</h4>
+                <p>• Pozitif yük bulutu içinde negatif yükler homojen/rastgele dağılmıştır (Üzümlü Kek).<br>• Katot ışın tüpü deneyleriyle e/m oranını hesaplamıştır.<br><strong>Eksiklikleri:</strong> Çekirdek ve nötron kavramı yoktur.</p>
+              </div>
+              <div class="info-box">
+                <h4>3. Rutherford Atom Modeli (1911)</h4>
+                <p>• <em>Alfa (α) Saçılma Deneyi: Altın levhaya yollanan α ışınlarının %99.99'u sapmadan geçer.</em><br>• Pozitif yük merkezde çok küçük hacimde toplanmıştır. Atomun büyük kısmı boşluktur.<br><strong>Eksiklikleri:</strong> Elektronların çekirdeğe neden düşmediğini açıklayamadı.</p>
+              </div>
+              <div class="info-box">
+                <h4>4. Bohr Atom Modeli (1913)</h4>
+                <p>• Elektronlar dairesel yörüngelerde (n=1, 2, 3...) bulunur.<br>• Temel Hal, Absorpsiyon ve Emisyon olaylarını tanımladı.<br><strong>Eksiklikleri:</strong> SADECE tek elektronlu sistemleri açıklayabilir! Çok elektronlu atom spektrumlarını açıklayamaz.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BÖLÜM 3 -->
+          <div class="section-card">
+            <h3 class="section-title">🔹 BÖLÜM 3: Modern Atom Teorisine Geçiş Öncüleri</h3>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>Max Planck (Kuantum Kuramı)</h4>
+                <p>Maddelerin enerjiyi kesikli (paketçikler / kuant) halinde absorplayıp yayabileceğini gösterdi. <code>E = h × ν</code></p>
+              </div>
+              <div class="info-box">
+                <h4>Louis de Broglie (Dalga-Tanecik)</h4>
+                <p>Elektron gibi taneciklerin de dalga özelliği gösterdiğini kanıtladı. <code>λ = h / (m × v)</code></p>
+              </div>
+              <div class="info-box">
+                <h4>Werner Heisenberg (Belirsizlik)</h4>
+                <p>"Bir elektronun konumu ve hızı aynı anda kesin olarak ÖLÇÜLEMEZ!" Bohr'un dairesel yörünge modelini tamamen yıkmıştır.</p>
+              </div>
+              <div class="info-box">
+                <h4>Erwin Schrödinger (Dalga Denklemi)</h4>
+                <p>Elektronun bulunma olasılığının yüksek olduğu 3D bölgeleri tanımladı. Bu bölgelere <strong>ORBİTAL (Elektron Bulutu)</strong> denir.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BÖLÜM 4 -->
+          <div class="section-card">
+            <h3 class="section-title">🔹 BÖLÜM 4: Yörünge vs Orbital & Kuantum Sayıları</h3>
+            <table>
+              <thead>
+                <tr><th>Özellik</th><th>Yörünge (Bohr Modeli)</th><th>Orbital (Modern Teori)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Hareket Boyutu</strong></td><td>Elektronun izlediği dairesel 2D yol.</td><td>Elektronun 3D hacimsel bölgesi.</td></tr>
+                <tr><td><strong>Tanım Şekli</strong></td><td>Elektronun adresi kesin bellidir.</td><td>Elektronun bulunma OLASILIĞI yüksektir.</td></tr>
+                <tr><td><strong>Geometri</strong></td><td>Daireseldir.</td><td>Farklı 3D şekillere sahiptir (s, p, d, f).</td></tr>
+              </tbody>
+            </table>
+            <h4 style="color:var(--accent); margin-top:20px; margin-bottom:10px;">4 Kuantum Sayısı</h4>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>1. Baş Kuantum Sayısı (n)</h4>
+                <p>Enerji düzeyini (katman/kabuk: n=1, 2, 3...) belirtir. n arttıkça potansiyel enerji ve hacim artar.</p>
+              </div>
+              <div class="info-box">
+                <h4>2. Açısal Momentum K.S. (l)</h4>
+                <p>Orbitalin türünü ve şeklini belirler (l = 0...n-1).<br><strong>l=0 → s</strong>, <strong>l=1 → p</strong>, <strong>l=2 → d</strong>, <strong>l=3 → f</strong>.</p>
+              </div>
+              <div class="info-box">
+                <h4>3. Manyetik K.S. (m<sub>l</sub>)</h4>
+                <p>Uzaydaki yönelimi ve orbital sayısını gösterir (m<sub>l</sub> = -l...0...+l, toplam 2l+1 tane).<br>s: 1 tane, p: 3 tane, d: 5 tane, f: 7 tane orbital içerir.</p>
+              </div>
+              <div class="info-box">
+                <h4>4. Spin K.S. (m<sub>s</sub>)</h4>
+                <p>Elektronun kendi etrafındaki dönme yönüdür (m<sub>s</sub> = +1/2 veya -1/2).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BÖLÜM 5 -->
+          <div class="section-card">
+            <h3 class="section-title">🔹 BÖLÜM 5: Orbitallerin Enerji Sıralaması & Elektron Dizilim Kuralları</h3>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>Madelung-Klechkowski Kuralı (n + l)</h4>
+                <p>(n + l) değeri küçük olan orbitalin enerjisi düşüktür ve önce dolar. (n+l) eşitse n'i küçük olanın enerjisi düşüktür (3p < 4s).</p>
+              </div>
+              <div class="info-box">
+                <h4>Aufbau İlkesi</h4>
+                <p>Elektronlar temel halde en düşük enerjili orbitalden başlanarak doldurulur.<br><code>1s < 2s < 2p < 3s < 3p < 4s < 3d < 4p < 5s...</code></p>
+              </div>
+              <div class="info-box">
+                <h4>Hund Kuralı</h4>
+                <p>Eş enerjili orbitallere elektronlar önce TEK TEK ve PARALEL SPİNLİ olarak yerleşir.</p>
+              </div>
+              <div class="info-box">
+                <h4>Pauli İlkesi</h4>
+                <p>Bir atomda 4 kuantum sayısı da aynı olan iki elektron BULUNAMAZ! Aynı orbitaldeki elektronlar ZIT spinlidir.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BÖLÜM 6 -->
+          <div class="section-card">
+            <h3 class="section-title">🔹 BÖLÜM 6: Orbital Türleri, Şekilleri, Manyetizma & Perdeleme Etkisi</h3>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>1. s Orbitalleri (l = 0, m<sub>l</sub> = 0)</h4>
+                <p>• Küreseldir. Çekirdek merkezdedir.<br>• Tüm temel enerji seviyelerinde (n=1'den itibaren) bulunur.<br>• En fazla 2 e<sup>-</sup> alır.</p>
+              </div>
+              <div class="info-box">
+                <h4>2. p Orbitalleri (l = 1, m<sub>l</sub> = -1, 0, +1)</h4>
+                <p>• Çekirdeğin iki tarafında uzanan 2 loblu (dambıl) yapıdadır.<br>• p<sub>x</sub>, p<sub>y</sub>, p<sub>z</sub> olmak üzere <strong>3 tane eş enerjili</strong> orbitalden oluşur. En fazla 6 e<sup>-</sup> alır.</p>
+              </div>
+              <div class="info-box">
+                <h4>3. d Orbitalleri (l = 2)</h4>
+                <p>• Karmaşık / 4 loblu yapılardır. 3. katmandan (n=3) başlar.<br>• <strong>5 tane eş enerjili</strong> orbitalden oluşur. En fazla 10 e<sup>-</sup> alır.</p>
+              </div>
+              <div class="info-box">
+                <h4>4. f Orbitalleri (l = 3)</h4>
+                <p>• 4. katmandan (n=4) başlar.<br>• <strong>7 tane eş enerjili</strong> orbitalden oluşur. Toplam en fazla 14 e<sup>-</sup> taşır.</p>
+              </div>
+            </div>
+            
+            <h4 style="color:var(--accent); margin-top:20px; margin-bottom:10px;">Manyetik Özellikler & Perdeleme Etkisi</h4>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>Paramanyetik Maddeler</h4>
+                <p>• Diziliminde EN AZ BİR TANE yarı dolu orbital içeren atom veya iyonlardır.<br>• Manyetik alan tarafından ÇEKİLİRLER. (Örn: <sub>7</sub>N: ...2p³)</p>
+              </div>
+              <div class="info-box">
+                <h4>Diamanyetik Maddeler</h4>
+                <p>• Bütün orbitalleri TAM DOLU olan atom veya iyonlardır.<br>• Manyetik alan tarafından hafifçe İTİLİRLER. (Örn: <sub>12</sub>Mg: ...3s²)</p>
+              </div>
+              <div class="info-box" style="grid-column: span 2;">
+                <h4>Perdeleme Etkisi & Nüfuz Etme Gücü (ÖSYM Soru Tipi)</h4>
+                <p>• Çekirdeğe yakın olan iç katman elektronları, dış katmandaki elektronların çekirdek tarafından çekilmesini engeller. Buna <strong>Perdeleme Etkisi</strong> denir.<br>
+                • Nüfuz etme (çekilme) gücü sıralaması: <code style="color:var(--primary); font-size:1.05rem;">s > p > d > f</code><br>• <strong>Etkin çekirdek yükü:</strong> <code style="color:var(--primary); font-size:1.05rem;">Z<sub>etkin</sub> = Z − S</code> (Z: çekirdek yükü, S: iç elektronların perdeleme etkisi). Aynı periyotta soldan sağa gidildikçe Z artar, aynı katmandaki elektronların perdelemesi pek değişmez; bu yüzden <strong>Z<sub>etkin</sub> artar</strong>. Sonuç olarak atom yarıçapı küçülür, iyonlaşma enerjisi genel olarak artar.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BÖLÜM 7 -->
+          <div class="section-card">
+            <h3 class="section-title">🔹 BÖLÜM 7: Küresel Simetri, İyon Dizilimleri & Uyarılmış Hal</h3>
+            <div class="info-grid">
+              <div class="info-box">
+                <h4>Küresel Simetri Nedir?</h4>
+                <p>Bir atomun elektron dizilimindeki en son alt kabuğun <strong>TAM DOLU</strong> (s², p⁶, d¹⁰, f¹⁴) veya <strong>YARI DOLU</strong> (s¹, p³, d⁵, f⁷) olması durumudur.<br>
+                • Küresel simetrik atomlar simetrik yük dağılımına sahiptir, ekstra KARARLIDIR.</p>
+              </div>
+              <div class="info-box" style="border: 2px solid var(--accent);">
+                <h4>⭐ ÖSYM'NİN EN SEVDİĞİ İSTİSNALAR (<sub>24</sub>Cr ve <sub>29</sub>Cu)</h4>
+                <p>• <strong><sub>24</sub>Cr : 1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹ 3d⁵</strong> (4s² 3d⁴ DEĞİL!)<br>
+                • <strong><sub>29</sub>Cu : 1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹ 3d¹⁰</strong> (4s² 3d⁹ DEĞİL!)<br>
+                <span class="highlight-red">⚠️ ÖSYM KRİTİK UYARISI:</span> Cr ve Cu atomlarının bu dizilimleri <strong>TEMEL HALDİR! Kesinlikle UYARILMIŞ HAL DEĞİLDİR!</strong></p>
+              </div>
+            </div>
+
+            <div class="osym-box" style="margin-top:20px;">
+              <strong>⭐ ALTIN KURAL (Elektron Nereden Kopar?):</strong><br>
+              Bir atomdan (katyondan) elektron koparılırken HER ZAMAN en dıştaki katmandan, yani <strong>BAŞ KUANTUM SAYISI (n) EN BÜYÜK OLAN ORBİTALDAN</strong> elektron kopar!
+            </div>
+            
+            <div style="background:rgba(15,23,42,0.6); padding:16px; border-radius:8px; border:1px solid var(--card-border); margin-top:10px;">
+              <p><strong>Örnek: Demir (<sub>26</sub>Fe) Katyonlarının Dizilimi</strong></p>
+              <p>• <sub>26</sub>Fe (Nötr Atom): <code>1s² 2s² 2p⁶ 3s² 3p⁶ 4s² 3d⁶</code></p>
+              <p>• <sub>26</sub>Fe<sup>2+</sup> İyonu (2 e<sup>-</sup> kopacak): Elektronlar 3d'den DEĞİL, <strong>4s orbitalinden</strong> kopar!<br>
+              → Fe<sup>2+</sup> Dizilimi: <code>[Ar] 3d⁶</code></p>
+              <p>• <sub>26</sub>Fe<sup>3+</sup> İyonu (3 e<sup>-</sup> kopacak): Önce 4s'deki 2 e<sup>-</sup>, ardından 3d'den 1 e<sup>-</sup> kopar!<br>
+              → Fe<sup>3+</sup> Dizilimi: <code>[Ar] 3d⁵</code> (Küresel Simetriktir!)</p>
+            </div>
+
+            <h4 style="color:var(--accent); margin-top:20px; margin-bottom:10px;">Temel Hal vs Uyarılmış Hal</h4>
+            <table>
+              <thead>
+                <tr><th>Özellik</th><th>Temel Hal Atom</th><th>Uyarılmış Hal Atom</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Dizilim</strong></td><td>Aufbau ve enerji sıralamasına uygundur.</td><td>Elektron dışarıdan enerji alarak üst bir orbital düzeye geçmiştir.</td></tr>
+                <tr><td><strong>Kararlılık & Enerji</strong></td><td>En düşük enerjilidir ve KARARLIDIR.</td><td>Yüksek enerjilidir ve KARARSIZDIR. Temel hale dönerken foton (emisyon) yayar.</td></tr>
+                <tr><td><strong>Kimyasal Özellik</strong></td><td>Proton ve elektron sayısı aynı kaldığı için kimyasal özellikleri <strong>AYNIDIR</strong>.</td><td>Hacim, çap ve potansiyel enerji değiştiği için fiziksel özellikleri <strong>FARKLI</strong>dır.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        
+<div class="section-card"><h3 class="section-title">🔹 BÖLÜM 8: Periyodik Sistem ve Elektron Dizilimi</h3><div class="info-grid"><div class="info-box"><h4>Periyot ve Grup Nasıl Bulunur?</h4><p>• <strong>Periyot</strong> = en dış katmanın baş kuantum sayısı (en büyük n).<br>• <strong>A grubu</strong> (s ve p bloğu) = son katmandaki elektron sayısı (s + p).<br>• Örn: ₁₇Cl: [Ne] 3s² 3p⁵ → 3. periyot, 7A grubu.</p></div><div class="info-box"><h4>Bloklar</h4><p><strong>s bloğu:</strong> 1A, 2A (+ He)<br><strong>p bloğu:</strong> 3A – 8A (He hariç)<br><strong>d bloğu:</strong> B grupları (geçiş metalleri)<br><strong>f bloğu:</strong> iç geçiş (lantanit, aktinit)</p></div><div class="info-box"><h4>d Bloğunda Grup</h4><p>Son s + d elektron sayısına bakılır: 3B…7B; 8, 9, 10 elektron → 8B; 11 → 1B; 12 → 2B.<br>Örn: ₂₅Mn (4s² 3d⁵) → 7B, ₂₉Cu (4s¹ 3d¹⁰) → 1B.</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong><strong>H</strong> elektron dizilimine göre 1A'dadır ama ametaldir. <strong>He</strong> 1s² ile s bloğunda olmasına rağmen 8A (soy gaz) grubundadır.</div></div>
+<div class="section-card"><h3 class="section-title">🔹 BÖLÜM 9: Periyodik Özellikler</h3><table><thead><tr><th>Özellik</th><th>Grupta ↓ (yukarıdan aşağı)</th><th>Periyotta → (soldan sağa)</th><th>İstisna / Not</th></tr></thead><tbody><tr><td>Atom yarıçapı</td><td>Artar (katman sayısı artar)</td><td>Azalır (etkin çekirdek yükü artar)</td><td>Soy gazlarda van der Waals yarıçapı ölçülür</td></tr><tr><td>İyonlaşma enerjisi (İE)</td><td>Azalır</td><td>Genel olarak artar</td><td>2A > 3A (Be>B, Mg>Al) ve 5A > 6A (N>O, P>S). Periyodun en yükseği soy gaz</td></tr><tr><td>Elektron ilgisi</td><td>Genel olarak azalır</td><td>Genel olarak artar</td><td>Cl'un elektron ilgisi F'dan büyüktür; 2A ve 8A'da küçük/pozitif</td></tr><tr><td>Elektronegatiflik</td><td>Azalır</td><td>Artar</td><td>En elektronegatif element F'dur</td></tr><tr><td>Metalik özellik</td><td>Artar</td><td>Azalır</td><td>Ametalik özellik tersi yönde değişir</td></tr></tbody></table><div class="info-grid"><div class="info-box"><h4>İyon Yarıçapı</h4><p>• Katyon, kendi atomundan <strong>küçüktür</strong>; anyon, kendi atomundan <strong>büyüktür</strong>.<br>• İzoelektronik taneciklerde proton sayısı arttıkça yarıçap küçülür: O²⁻ > F⁻ > Ne > Na⁺ > Mg²⁺.</p></div><div class="info-box"><h4>Yarıçap Türleri</h4><p>Aynı element için van der Waals yarıçapı kovalent yarıçaptan büyüktür. İyonik yarıçap iyonik bileşikteki iyonlar için düşünülür.</p></div><div class="info-box"><h4>Enerji Değişimi (İE ve E.İ)</h4><p>İyonlaşma enerjisi <strong>daima endotermiktir</strong> (ΔH &gt; 0; elektron koparmak için enerji verilir). Elektron ilgisi genellikle <strong>ekzotermiktir</strong> (ΔH &lt; 0; enerji açığa çıkar); 2A ve 8A gibi istisnalarda endotermik olabilir. Bazı kaynaklar E.İ'yi açığa çıkan enerji olarak pozitif yazar, işarete dikkat et.</p></div><div class="info-box"><h4>Ardışık İyonlaşma Enerjileri</h4><p>Aynı atomda İE₁ < İE₂ < İE₃ … sıralaması vardır. Değerlik elektronları bittikten sonra <strong>büyük bir sıçrama</strong> olur. Örn: 1A'da İE₂, 2A'da İE₃ çok büyüktür; sıçramanın yeri değerlik elektron sayısını (grubu) gösterir.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🔹 BÖLÜM 10: Elementleri Tanıyalım</h3><div class="info-grid"><div class="info-box"><h4>1A – Alkali Metaller (H hariç)</h4><p>Yumuşak, düşük yoğunluklu; +1 yüklü iyon oluşturur. Suyla şiddetle tepkime verip H₂ çıkarır. Grupta aşağı indikçe reaktiflik artar.</p></div><div class="info-box"><h4>2A – Toprak Alkali Metaller</h4><p>+2 yüklü iyon oluşturur. Grupta aşağı indikçe reaktiflik artar.</p></div><div class="info-box"><h4>3A – 4A</h4><p>B yarı metaldir; Al amfoter karakterlidir (+3). 4A'da C ametal, Si ve Ge yarı metal, Sn ve Pb metaldir.</p></div><div class="info-box"><h4>5A – 6A</h4><p>Azot grubu ve oksijen grubu (kalkojenler). Grupta aşağı inildikçe metalik özellik artar.</p></div><div class="info-box"><h4>7A – Halojenler</h4><p>İki atomlu moleküller (F₂, Cl₂, Br₂, I₂). −1 yüklü iyon oluşturur. Reaktiflik yukarı çıkıldıkça artar; Br₂ oda koşullarında sıvıdır.</p></div><div class="info-box"><h4>8A – Soy Gazlar</h4><p>Tek atomlu ve kararlıdır; son katmanları tam doludur (He: 2, diğerleri 8 elektron).</p></div><div class="info-box"><h4>Amfoter Metaller</h4><p><strong>Al, Zn, Cr, Sn, Pb, Be</strong> amfoter metallerdir: hem asitlerle hem kuvvetli bazlarla tepkime verirler. Oksit ve hidroksitleri de amfoterdir.</p></div><div class="info-box"><h4>d ve f Blokları</h4><p>Geçiş metalleri: çoğu değişken yükseltgenme basamağı alır, çoğunun iyon ve bileşikleri renklidir, iyi iletkendir. Hg oda koşullarında sıvı metaldir. f bloğu: lantanitler (6. periyot) ve aktinitler (7. periyot); periyodik sistemde <strong>3B grubunda</strong> yer alır ve tablonun altında ayrı gösterilir.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🔹 BÖLÜM 11: Yükseltgenme Basamakları</h3><table><thead><tr><th>Kural</th><th>Örnek</th></tr></thead><tbody><tr><td>Serbest element (atom veya molekül) için 0</td><td>Na, O₂, S₈ → 0</td></tr><tr><td>Tek atomlu iyonda yükseltgenme basamağı iyon yüküdür</td><td>Fe³⁺ → +3, Cl⁻ → −1</td></tr><tr><td>Nötr bileşikte toplam 0; çok atomlu iyonda toplam iyon yüküne eşit</td><td>SO₄²⁻: x + 4(−2) = −2 → S = +6</td></tr><tr><td>1A bileşiklerinde +1, 2A bileşiklerinde +2, Al +3, F daima −1</td><td>NaCl: Na +1, Cl −1</td></tr><tr><td>H genelde +1 (metal hidrürlerde −1)</td><td>NaH → H = −1</td></tr><tr><td>O genelde −2 (peroksitlerde −1, OF₂'de +2)</td><td>H₂O₂ → O = −1</td></tr></tbody></table><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Atom elektron verirse yükseltgenir (basamak artar), elektron alırsa indirgenir (basamak azalır). A grubu elementinin en büyük pozitif basamağı grup numarasıdır; ametallerin en küçük basamağı (grup no − 8)'dir. Örn: KMnO₄ → Mn +7, K₂Cr₂O₇ → Cr +6, NO₃⁻ → N +5.</div></div>
+        
+<div class="section-card"><h3 class="section-title">🔹 BÖLÜM 12: Çıkmış Konular</h3><p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px">Çıkmış soru listelerinden derlendi; 2020 ve 2024-2026 satırları ünite/bölüm etiketlerine dayanıyor, ÖSYM kitapçığından da teyit et. 2018'de bu üniteden soru çıkmadı. 2019 için kaynaklar çelişiyor: soru dağılım tablolarında yok, bir çıkmış soru listesinde 1. bölümden bir soru görünüyor; 2019 AYT kitapçığından bak.</p><table><thead><tr><th>Yıl</th><th>Konu</th></tr></thead><tbody><tr><td>2018</td><td>-</td></tr><tr><td>2019</td><td>-</td></tr><tr><td>2020 (2 soru)</td><td>Atomun kuantum modeli ve periyodik sistem – elektron dizilimleri (1. ve 2. bölümden birer soru)</td></tr><tr><td>2021</td><td>Yükseltgenme basamağı</td></tr><tr><td>2022</td><td>Modern atom teorisine göre elektron dizilimleri</td></tr><tr><td>2023</td><td>İyonun soy gaz dizilimi ve kuantum sayıları (n, ℓ, mₗ, mₛ'ye göre elektron sayıları)</td></tr><tr><td>2024</td><td>Atomun kuantum modeli (kuantum sayıları, orbitaller)</td></tr><tr><td>2025</td><td>Atomun kuantum modeli</td></tr><tr><td>2026</td><td>Atomun kuantum modeli</td></tr></tbody></table></div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 2. KONU NOTLARI: GAZLAR (Geçiş Sorunu Çözüldü)  -->
+        <!-- ============================================== -->
+        <div id="notes-gazlar" class="topic-notes">
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 1: Gazların Genel Özellikleri</h3><div class="info-grid"><div class="info-box"><h4>Yapı</h4><p>• Maddenin en düzensiz halidir; tanecikleri arasında büyük boşluklar vardır.<br>• Bulundukları kabın şeklini ve hacmini alırlar.<br>• Özkütleleri katı/sıvıdan 1000-10 000 kat küçük, molar hacimleri büyüktür.</p></div><div class="info-box"><h4>Genleşme & Karışım</h4><p>• Genleşme katsayısı tüm gazlar için aynıdır: normal şartlarda sıcaklık 1°C artarsa hacim 1/273 oranında artar.<br>• Gaz karışımları homojendir.</p></div><div class="info-box"><h4>İdeal / Gerçek Gaz</h4><p>• Tanecikleri arasında etkileşim olan, basınç veya sıcaklıkla sıvılaştırılabilen gazlar <strong>gerçek gazdır</strong>.<br>• Gerçek gazlarda molekül kütlesi ve hacmi ihmal edilmez.</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Gaz sorularında sıcaklık <strong>DAİMA KELVİN</strong> olmalıdır: <code style="color:var(--primary)">T(K) = t(°C) + 273</code>. Soruda °C verilmişse önce çevir!</div></div>
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 2: Açık Hava Basıncı ve Barometre</h3><p>Kinetik teoriye göre gaz moleküllerinin birbirine ve kabın çeperlerine yaptığı kuvvete <strong>basınç</strong> denir. Gazlar bulundukları kabın her yerine aynı basıncı uygular.</p><div class="info-grid"><div class="info-box"><h4>Torricelli Barometresi</h4><p>Açık hava basıncı barometreyle ölçülür. Deniz seviyesi, 0°C: <code style="color:var(--primary)">P₀ = h = 76 cmHg</code><br>1 atm = 76 cmHg = 760 mmHg = 760 torr<br>1 atm = 101 325 Pa = 1,01325 bar ≈ 10⁵ Pa ≈ 1 bar</p></div><div class="info-box"><h4>h Yüksekliği Neye Bağlı?</h4><p>• <strong>Bağlıdır:</strong> sıvının cinsine (yoğunluk büyüdükçe h küçülür: <code style="color:var(--primary)">h₁·d₁ = h₂·d₂</code>), açık hava basıncına (yükseldikçe h azalır; her 10,5 m yükselişte basınç 1 mmHg düşer), hava şartlarına.<br>• <strong>Bağlı DEĞİLDİR:</strong> sıvı miktarına, borunun şekline ve çapına.</p></div></div><table><thead><tr><th>Düzenek</th><th>Gazın basıncı</th></tr></thead><tbody><tr><td>Gaz, cıva sütununun <strong>altında</strong> (sütunun üstü açık hava)</td><td>P<sub>x</sub> = P₀ + h</td></tr><tr><td>Gaz, cıva sütununun <strong>üstünde</strong> (sütunun altı açık hava)</td><td>P<sub>x</sub> = P₀ − h</td></tr><tr><td>Cıva sütunu yatay (bir yanı gaz, bir yanı açık hava)</td><td>P<sub>x</sub> = P₀</td></tr><tr><td>Ters çevrili tüpte sıvı seviyesi dışarıdaki seviyeden yukarıda / eşit / aşağıda</td><td>P₀ − h / P₀ / P₀ + h</td></tr><tr><td>Serbest hareketli piston veya balon</td><td>P<sub>x</sub> = P₀</td></tr></tbody></table></div>
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 3: Hacim ve Birimler</h3><div class="info-grid"><div class="info-box"><h4>Molar Hacim</h4><p>Normal koşullarda (0°C, 1 atm) 1 mol gaz <strong>22,4 L</strong>; oda koşullarında (25°C, 1 atm) <strong>24,5 L</strong> hacim kaplar.</p></div><div class="info-box"><h4>Birim Dönüşümü</h4><p>1 mL = 1 cm³<br>1 L = 1000 mL</p></div></div></div>
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 4: Gazların Yayılma Hızı (Difüzyon & Efüzyon)</h3><p>Aynı veya farklı gaz moleküllerinin birbiri arasında yayılmasına <strong>difüzyon</strong>, küçük bir delikten boşluğa veya düşük basınçlı ortama yayılmasına <strong>efüzyon</strong> denir.</p><div class="info-grid"><div class="info-box"><h4>Kinetik Enerji</h4><p>Ortalama Ek = (3/2)·k·T = ½·m·v²<br>Ek yalnızca sıcaklıkla doğru orantılıdır; hız ise <code style="color:var(--primary)">v ∝ √(T/Ma)</code> (Ma = mol kütlesi, d = yoğunluk için v ∝ 1/√d).</p></div><div class="info-box"><h4>Graham Yasası</h4><p><code style="color:var(--primary)">V<sub>A</sub>/V<sub>B</sub> = √(T<sub>A</sub>·Ma<sub>B</sub> / T<sub>B</sub>·Ma<sub>A</sub>)</code><br>Aynı T'de hafif gaz daha hızlı yayılır.</p></div><div class="info-box"><h4>Efüzyon</h4><p>Hız ile süre ters orantılıdır: <code style="color:var(--primary)">V<sub>A</sub>/V<sub>B</sub> = t<sub>B</sub>/t<sub>A</sub></code></p></div><div class="info-box"><h4>Çarpma Sayısı</h4><p>Birim hacimdeki tanecik sayısı M = n/V<br>Birim zamanda birim yüzeye çarpma sayısı <code style="color:var(--primary)">ÇS = (n/V)·√(T/Ma)</code><br><strong>ÖSYM sayısal hesaplatmaz, sadece artar/azalır orantı yorumu sorar.</strong></p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Yayılma hızı <strong>madde miktarına bağlı değildir</strong>. Sıcaklıklar eşitse ortalama kinetik enerjiler de eşittir (kütleleri farklı olsa bile).</div></div>
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 5: İdeal Gaz ve İdeal Gaz Denklemi</h3><div class="info-grid"><div class="info-box"><h4>Kinetik Teoriye Göre İdeal Gaz</h4><p>• Tanecikleri arasında etkileşim yoktur, itme-çekme kuvveti uygulamazlar.<br>• Esnek çarpışma yaparlar; kendi hacimleri boşluğun yanında ihmal edilir.<br>• Düşük sıcaklık veya yüksek basınçta sıvılaşmazlar.<br>• Ortalama kinetik enerjileri sıcaklıkla orantılıdır. Hareketleri sürekli, gelişigüzel, doğrusal ve zikzaklıdır (<strong>Brown hareketi</strong>).</p></div><div class="info-box"><h4>İdeale Yaklaşma Koşulları</h4><p>İdeal gaz yoktur, gazlar ideale yaklaşır:<br><code style="color:var(--primary)">P ↓   T ↑   Ma ↓   Apolar molekül</code><br>Apolar moleküller ideale daha yakındır (en zayıf bağ: London). Gaz tanecikleri birbirine yaklaştıran her etki gazı idealden uzaklaştırır. Kaynama noktası (KN) ve yoğunluk düşük olan gaz ideale daha yakındır.</p></div></div><p style="margin-top:14px"><code style="color:var(--primary)">P·V = n·R·T</code> (P: atm, V: L, n: mol, T: K)</p><table><thead><tr><th>R değeri</th><th>Ne zaman?</th></tr></thead><tbody><tr><td>22,4 / 273</td><td>T, 273 K ve katlarıysa</td></tr><tr><td>0,082</td><td>T = 200 K, 300 K… gibi diğer durumlarda</td></tr></tbody></table></div>
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 6: Gaz Yasaları</h3><p>Yasalarla ilgili problemlerde sabit tutulan kavramlar elenir; geriye kalanlar <strong>1. durum / 2. durum</strong> oranı şeklinde yazılır.</p><table><thead><tr><th>Yasa</th><th>Sabit</th><th>Bağıntı</th><th>Yorum</th></tr></thead><tbody><tr><td>Boyle</td><td>T, n</td><td><code style="color:var(--primary)">P₁V₁ = P₂V₂</code></td><td>P ∝ 1/V (hiperbol); P·V – V grafiği yatay doğru</td></tr><tr><td>Charles</td><td>P, n</td><td><code style="color:var(--primary)">V₁/T₁ = V₂/T₂</code></td><td>V ∝ T(K); V–t(°C) doğrusu −273'ten geçer (mutlak sıfırda gaz olmadığından çizgi o noktadan başlamaz)</td></tr><tr><td>Gay-Lussac</td><td>V, n</td><td><code style="color:var(--primary)">P₁/T₁ = P₂/T₂</code></td><td>P ∝ T(K); P–t(°C) doğrusu −273'ten geçer</td></tr><tr><td>Avogadro</td><td>P, T</td><td><code style="color:var(--primary)">V₁/n₁ = V₂/n₂</code></td><td>V ∝ n; NK'da 1 mol 22,4 L</td></tr><tr><td>P – n</td><td>V, T</td><td>P ∝ n</td><td>Doğrusal grafik</td></tr><tr><td>P – özkütle</td><td>—</td><td><code style="color:var(--primary)">P·Ma = d·R·T</code></td><td>P·V = (m/Ma)·R·T'den gelir</td></tr><tr><td>Birleştirilmiş</td><td>—</td><td><code style="color:var(--primary)">P₁V₁ / P₂V₂ = n₁T₁ / n₂T₂</code></td><td>P·V – T(K) doğrusal, Ek – T(K) doğrusal</td></tr></tbody></table><div class="osym-box"><strong>⭐ ÖSYM NOTU (Eksen Tuzağı):</strong>V–T veya P–T grafiğinde sıcaklık ekseni <strong>Kelvin (K)</strong> ise doğru orijinden (0 K) geçer, V ∝ T ve P ∝ T orantısı doğrudan okunur. Eksen <strong>°C</strong> ise doğru −273°C noktasından (kesikli çizgiyle) başlar; doğru orijinden geçmediği için V ve P sıcaklık(°C) ile doğru orantılı değildir. ÖSYM grafik sorularında eksen birimini tuzak olarak kullanır, önce eksene bak!</div></div>
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 7: Gaz Karışımları, Kısmi Basınç ve Su Üstünde Toplama</h3><div class="info-grid"><div class="info-box"><h4>Tepkimesiz Gazların Karışması (Birleşik Kaplar)</h4><p><code style="color:var(--primary)">P<sub>s</sub>·V<sub>s</sub> = P₁V₁ + P₂V₂ + …</code><br>V<sub>s</sub> toplam hacimdir (vakumlu kap da toplama dahildir).</p></div><div class="info-box"><h4>Kısmi Basınç</h4><p><code style="color:var(--primary)">P<sub>x</sub> = P<sub>T</sub>·(n<sub>x</sub>/n<sub>T</sub>) = P<sub>T</sub>·X<sub>x</sub></code><br>X: mol kesri, X<sub>x</sub> + X<sub>y</sub> = 1</p></div><div class="info-box"><h4>Suyun Üstünde Toplama</h4><p>Suda çözünmeyen ve su ile tepkimeye girmeyen gaz: <code style="color:var(--primary)">P<sub>T</sub> = P<sub>gaz</sub> + P<sub>H₂O</sub></code><br>Sıvıyla dengedeki sistemin sıcaklığı değişmediği sürece buhar basıncı (BB) değişmez.<br><strong>Piston çekilse de itilse de</strong> (sıcaklık sabit, kapta sıvı su varken) P<sub>H₂O</sub> değişmez; yalnızca diğer gazın kısmi basıncı hacimle ters orantılı değişir. Sıvı su tamamen buharlaşırsa bu geçerli olmaz.</p></div><div class="info-box"><h4>Bağıl Nem</h4><p><code style="color:var(--primary)">Bağıl nem % = (havadaki kısmi buhar basıncı / saf suyun BB) × 100</code><br>%100'e ulaşırsa yağış olur.</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong><strong>Piston çekilse de itilse de P<sub>H₂O</sub> değişmez</strong> (T sabit, sıvı su varken)! Buhar basıncı sorularında önce P<sub>H₂O</sub>'yu çıkar, yalnızca <strong>diğer gazı</strong> yorumla (hacim değişimi vb.), sonra BB'yi tekrar ekle!<br>Sabit hacimli kapta başka gaz eklemek diğer gazın kısmi basıncını DEĞİŞTİRMEZ; <strong>pistonlu kapta</strong> hacim artacağı için kısmi basıncı azalır.</div></div>
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 8: Gerçek Gazlar, Sıvılaşma ve Faz Diyagramları</h3><div class="info-grid"><div class="info-box"><h4>Gerçek Gaz</h4><p>1 mol ideal gaz için PV/RT = 1; gerçek gaz için ≠ 1.<br>V<sub>gerçek</sub> = V<sub>kap</sub> + V<sub>molekül</sub> > V<sub>ideal</sub> ve P<sub>gerçek</sub> < P<sub>ideal</sub> (notundaki gösterim).<br>Gerçek gazlar P↓ T↑ Ma↓ ve apolarsa ideale yaklaşır. Polar moleküller ideallikten daha uzaktır.</p></div><div class="info-box"><h4>Gaz – Buhar</h4><p>• Bulunduğu sıcaklıkta hiçbir basınç altında sıvılaştırılamayan akışkana <strong>gaz</strong>, yalnızca belli sıcaklıkta sıvılaşabilen akışkana <strong>buhar</strong> denir.<br>• Kritik sıcaklık (T<sub>k</sub>): gazın basınçla sıvılaştırılamadığı sıcaklık. KN ile T<sub>k</sub> arasında madde buhar halindedir.<br>• Moleküller arası çekim arttıkça T<sub>k</sub> artar.</p></div><div class="info-box"><h4>Sıvılaşma</h4><p>İki etken: <strong>sıcaklığı düşürmek</strong> (Ek azalır) ve <strong>basıncı artırmak</strong>. Sanayide ikisi birleştirilir. Gazın sıvılaşması ekzotermiktir.</p></div><div class="info-box"><h4>Faz Diyagramları</h4><p>• <strong>Su:</strong> üçlü nokta (A) 0,01°C ve 0,006 atm. Katı-sıvı eğrisi <strong>sola yatıktır</strong> (basınç artarsa erime noktası düşer).<br>• <strong>CO₂:</strong> üçlü nokta −57°C ve 5,2 atm. 1 atm'de −78°C'de süblimleşir; sıvı hali ancak üçlü nokta basıncının üstünde görülür.</p></div><div class="info-box"><h4>Joule-Thomson Olayı</h4><p>Sıkıştırılmış gazın basıncı ani düşürülünce hızla genleşir ve <strong>soğur</strong>. Buzdolabı ve derin dondurucuların soğutması bu olaya dayanır.</p></div><div class="info-box"><h4>Soğutucu Akışkan</h4><p>KN düşük, T<sub>k</sub> yüksek, zehirsiz, kimyasal olarak inert, ucuz, çevreye zararsız ve az enerjiyle buharlaşıp yoğunlaşabilen olmalı. (Notunda CFC geçiyor; ozona zararı nedeniyle günümüzde yerini başka bileşikler aldı, kitabındaki ifadeyi kontrol et.)</p></div></div></div>
+        
+<div class="section-card"><h3 class="section-title">☁️ BÖLÜM 9: Çıkmış Konular</h3><p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px">&quot;-&quot; o yıl bu konudan soru çıkmadığını gösterir. * işaretli satırlar doğrulanmamış bir listeden eklendi, ÖSYM kitapçığından teyit et.</p><table><thead><tr><th>Yıl</th><th>Konu</th></tr></thead><tbody><tr><td>2018</td><td>Difüzyon hızı (Graham), mol sayısı–hacim ilişkisi, ortalama kinetik enerji</td></tr><tr><td>2019</td><td>Graham difüzyon yasası, gazların su üstünde toplanması (kısmi basınç)</td></tr><tr><td>2020</td><td>Gaz karışımı, birleşik kaplar (P₁V₁ + P₂V₂ + P₃V₃ = P<sub>s</sub>V<sub>s</sub>)</td></tr><tr><td>2021</td><td>Birleştirilmiş gaz denklemi (mol sayısı ve sıcaklık değişimi, pistonlu kap)</td></tr><tr><td>2022</td><td>İdeal gaz denklemi, basınç – özkütle bağıntısı (P·Ma = d·R·T)</td></tr><tr><td>2023 (2 soru)</td><td>Kapalı kaplarda toplam basınç, ortalama kinetik enerji ve efüzyon süresi (He – H₂); gaz yoğunluğu (P ve T değişimi)</td></tr><tr><td>2024</td><td>Graham difüzyon / efüzyon yasası (sıcaklık ve mol kütlesine göre yayılma hızı)*</td></tr><tr><td>2025</td><td>İdeal pistonlu kapta dengedeki gaz sistemi, gazın mol kütlesi (ideal gaz denklemi, özkütle ilişkisi)*</td></tr><tr><td>2026 (2 soru)</td><td>Birleşik kaplar (musluk açılınca son basınç) ve kısmi basınç*</td></tr></tbody></table></div>
+        </div>
+
+        <div id="notes-sivi" class="topic-notes">
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 1: Derişim Birimleri</h3><div class="info-grid"><div class="info-box"><h4>Molarite (M)</h4><p><code style="color:var(--primary)">M = n / V(L)</code><br><code style="color:var(--primary)">M = %c · d · 10 / Ma</code><br>(%c: kütlece yüzde, d: g/mL)</p></div><div class="info-box"><h4>Yüzde Derişim</h4><p><code style="color:var(--primary)">Kütlece % = (m<sub>çözünen</sub> / m<sub>çözelti</sub>) · 100</code><br><code style="color:var(--primary)">Hacimce % = (V<sub>çözünen</sub> / V<sub>çözelti</sub>) · 100</code><br>m<sub>çözelti</sub> = m<sub>çözünen</sub> + m<sub>çözücü</sub></p></div><div class="info-box"><h4>Seyreltme / Derişikleştirme</h4><p><code style="color:var(--primary)">M₁V₁ = M₂V₂</code><br>Çözücü ekleyince veya buharlaştırınca çözünen mol sayısı değişmez.</p></div><div class="info-box"><h4>Aynı Cins Çözeltileri Karıştırma</h4><p><code style="color:var(--primary)">M₁V₁ + M₂V₂ = M<sub>s</sub>V<sub>s</sub></code></p></div><div class="info-box"><h4>Molalite (m)</h4><p><code style="color:var(--primary)">m = n(çözünen) / kg(çözücü)</code><br>Paydada çözeltinin değil <strong>çözücünün</strong> kütlesi bulunur.</p></div><div class="info-box"><h4>Mol Kesri</h4><p><code style="color:var(--primary)">X<sub>a</sub> = n<sub>a</sub> / n<sub>T</sub></code><br>n<sub>T</sub> = n<sub>a</sub> + n<sub>b</sub>, X<sub>a</sub> + X<sub>b</sub> = 1. Mol kesri <strong>birimsizdir</strong>.</p></div><div class="info-box"><h4>ppm (Milyonda Bir)</h4><p>Çözücü ve çözünenin birimi aynıysa 10⁶'lık çözeltide çözünen miktarıdır. 1 kg'lık çözeltide çözünenin mg'ı; sulu çözeltide 1 L çözeltideki çözünenin mg'ıdır. Çözünen çok az olduğundan çözelti kütlesi yerine çözücü kütlesi alınabilir.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 2: İyon Derişimleri</h3><div class="info-grid"><div class="info-box"><h4>Tek Çözeltide</h4><p>NaCl 0,1 M → Na⁺ 0,1 M + Cl⁻ 0,1 M<br>Al₂(SO₄)₃ 0,5 M → 2Al³⁺ (1 M) + 3SO₄²⁻ (1,5 M); toplam iyon 2,5 M.</p></div><div class="info-box"><h4>Aynı Cins Çözeltiler</h4><p>Yeni konumdaki her iyonun derişimi ayrı ayrı M₁V₁ + M₂V₂ = M<sub>s</sub>V<sub>s</sub> ile bulunur.<br>0,1 M NaCl (200 mL) + 0,2 M NaCl (300 mL): [Na⁺] = (20 + 60)/500 = 0,16 M = [Cl⁻].</p></div><div class="info-box"><h4>Farklı Cins Çözeltiler</h4><p>Her iyon ayrı ayrı düşünülür.<br>0,2 M MgCl₂ (200 mL) + 0,2 M AlCl₃ (200 mL): [Mg²⁺] = 0,1 M, [Al³⁺] = 0,1 M, [Cl⁻] = (0,4·200 + 0,6·200)/400 = 0,5 M.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 3: Koligatif Özellikler</h3><p>Çözünenin türüne değil, <strong>tanecik sayısına</strong> bağlı özelliklerdir. Burada uçucu olmayan çözünen ele alınır.</p><div class="info-grid"><div class="info-box"><h4>1) Kaynama Noktası Yükselmesi (Ebülyoskopi)</h4><p>Çözünenin Ma'sı bu yolla bulunabilir. Çözünen miktarı arttıkça KN artar.<br><code style="color:var(--primary)">ΔT<sub>k</sub> = K<sub>k</sub> · m</code><br>Suda 1 molal tanecik, 1 atm'de KN'yi <strong>0,52°C</strong> artırır.</p></div><div class="info-box"><h4>2) Donma Noktası Alçalması (Kriyoskopi)</h4><p>Çözünen miktarı arttıkça DN azalır.<br><code style="color:var(--primary)">ΔT<sub>d</sub> = K<sub>d</sub> · m</code><br>Suda 1 molal tanecik, DN'yi <strong>1,86°C</strong> azaltır.</p></div><div class="info-box"><h4>3) Buhar Basıncı Düşmesi</h4><p>Çözünen arttıkça çözeltinin buhar basıncı düşer (Bölüm 4).</p></div><div class="info-box"><h4>4) Ozmotik Basınç (Ozmoz / Ters Ozmoz)</h4><p><strong>Ozmoz:</strong> Çözücü moleküllerinin yarı geçirgen zardan seyreltik çözeltiden (veya saf çözücüden) derişik çözeltiye geçmesidir. Zar yalnızca çözücüyü geçirir, çözüneni geçirmez.<br><strong>Ozmotik basınç:</strong> Ozmozu durdurmak için derişik çözeltiye uygulanması gereken basınçtır. Tanecik derişimi arttıkça ozmotik basınç artar; hesap gerekirse <code style="color:var(--primary)">π = i·M·R·T</code> (R = 0,082). Tanecik derişimleri eşit çözeltiler arasında net ozmoz olmaz.<br><strong>Ters ozmoz:</strong> Derişik çözeltiye ozmotik basıncından büyük basınç uygulanırsa çözücü bu kez derişik taraftan seyreltik tarafa geçer. Deniz suyundan içme suyu elde etmede ve su arıtmada kullanılır.</p></div><div class="info-box"><h4>Tanecik Sayısı</h4><p>İyonik çözünmede her iyon, moleküler çözünmede her molekül ayrı tanecik sayılır.<br>C₆H₁₂O₆ → 1, NaCl / KCl → 2, CaCl₂ / Na₂SO₄ / K₂SO₄ → 3, Al(NO₃)₃ → 4.<br>K<sub>k</sub> ve K<sub>d</sub> her tanecik için geçerlidir.</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Eşit derişimli çözeltilerde tanecik sayısı en çok olanın KN'si en yüksek, DN'si ve BB'si en düşüktür. Örn: Al(NO₃)₃ (4M) > Na₂SO₄ (3M) > KCl (2M).<br>Uçucu bir çözünen varsa sulu çözeltinin KN'si 100°C'den küçük veya büyük olabilir; çözünenin KN'sine bağlıdır.</div><p>Isınma/soğuma grafiklerinde saf maddede kaynama/donma sırasında sıcaklık sabittir. Çözeltide saf maddeden yüksek sıcaklıkta kaynamaya, düşük sıcaklıkta donmaya başlanır; doymamış çözeltide süreç boyunca sıcaklık değişir, doymuş hale gelince sabitlenir. Çözeltinin faz diyagramında katı-sıvı eğrisi ΔT<sub>d</sub> kadar sola, sıvı-gaz eğrisi ΔT<sub>k</sub> kadar sağa kayar.</p></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 4: Buhar Basıncı ve Raoult Yasası</h3>
+<div class="info-grid">
+<div class="info-box"><h4>Tanım</h4><p>Sıvısıyla dengede bulunan buharın kaba yaptığı basınçtır.</p></div>
+<div class="info-box"><h4>Raoult Yasası</h4><p>Katı-sıvı çözelti (A çözücü, B çözünen): <code style="color:var(--primary)">P<sub>çözelti</sub> = P°<sub>A</sub>·X<sub>A</sub></code><br>Sıvı-sıvı çözelti: <code style="color:var(--primary)">P = P°<sub>A</sub>·X<sub>A</sub> + P°<sub>B</sub>·X<sub>B</sub></code><br>İyonik çözünende toplam mol sayısına her iyonun mol sayısı eklenir.</p></div>
+</div>
+<h4 style="color:var(--primary); margin:24px 0 4px; font-size:1.05rem;">⭐ 3S Kuralı: Buhar Basıncını Ne Etkiler?</h4>
+<div class="info-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+<div class="info-box"><h4>1. Sıcaklık</h4><p><span class="highlight-green">Artarsa BB artar.</span><br>Örn: BB(70°C) &gt; BB(50°C)</p></div>
+<div class="info-box"><h4>2. Sıvının Cinsi</h4><p>Tanecikler arası çekim zayıfsa <span class="highlight-green">KN düşük, BB yüksek</span> olur.<br>Örn: 78°C'de BB(etil alkol) &gt; BB(su)</p></div>
+<div class="info-box"><h4>3. Saflık</h4><p>Uçucu olmayan madde (tuz, şeker) eklenince <span class="highlight-red">BB düşer</span>.<br>Örn: BB(saf su) &gt; BB(tuzlu su)<br><small style="color:var(--text-muted)">Saflık etkisi madde cinsi gibi yorumlanır.</small></p></div>
+</div>
+<div class="info-box" style="margin-top:16px; border-color:#f87171;"><h4 style="color:#f87171;">🚫 BB Bunlara Bağlı DEĞİLDİR</h4><p>Hacim · Piston hareketi · Kap şekli · Sıvı miktarı · Dış (açık hava) basıncı<br><small style="color:var(--text-muted)">(Kapta sıvı varken geçerlidir.)</small><br>Örn: Aynı sıcaklıkta Antalya'daki ve Ağrı'daki suyun BB'si eşittir. Kaynama anında BB = dış basınç olduğundan BB(Antalya) &gt; BB(Ağrı).</p></div>
+</div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 5: Çözünürlük ve Çözelti Türleri</h3><div class="info-grid"><div class="info-box"><h4>Çözünürlük</h4><p>Belirli sıcaklık ve basınçta çözücünün 100 g'ında çözünebilen madde miktarıdır.</p></div><div class="info-box"><h4>Çözünme Süreci (Hidratlaşma / Solvatlaşma)</h4><p>Çözünen taneciklerin çözücü molekülleriyle sarılmasına <strong>solvatlaşma</strong> (solvatasyon) denir. Çözücü <strong>su</strong> ise bu olaya <strong>hidratlaşma</strong> (hidratasyon) denir. Benzen, alkol gibi başka çözücülerde de solvatlaşma olur.</p></div><div class="info-box"><h4>Çözünürlük Eğrisi Yorumu</h4><p><strong>Eğrinin tam üzeri:</strong> doymuş çözelti.<br><strong>Eğrinin altı:</strong> doymamış çözelti.<br><strong>Eğrinin üstü:</strong> aşırı doymuş (fazlası çözünmüş, kararsız) veya fazlası çökmüş, dibinde katısıyla dengede olan doymuş çözelti bölgesi.</p></div><div class="info-box"><h4>Çözünürlüğe Göre</h4><p><strong>Doymamış:</strong> o sıcaklıkta çözebileceğinden <em>az</em> çözünen içerir; aynı maddeden eklenirse çözünür.<br><strong>Doymuş:</strong> o sıcaklıkta çözebileceği en fazla miktarı çözmüştür; ilave çözünen çözünmez. Dibinde katısı bulunan çözelti doymuştur (çözünme ve çökelme hızı eşit, denge halinde).<br><strong>Aşırı doymuş:</strong> o sıcaklıkta çözebileceğinden <em>fazla</em> çözünen içerir. Kararsızdır: çalkalanır veya içine çözünenden bir kristal atılırsa fazlası çöker ve çözelti doymuş hale gelir. Dibinde katı bulunmaz; genellikle sıcak doymuş çözeltinin dikkatle soğutulmasıyla elde edilir.<br><strong>Sıcaklık değişince tür değişebilir:</strong> çözünürlüğü sıcaklıkla artan katının doymuş çözeltisi ısıtılırsa doymamış olur, soğutulursa fazlası çöker.</p></div><div class="info-box"><h4>İletkenliğe Göre</h4><p>Elektrolit: asit, baz, tuz.<br>Elektrolit olmayan: CH₃OH (metil alkol), C₂H₅OH (etil alkol), C₆H₁₂O₆ (glikoz).</p></div><div class="info-box"><h4>Madde Miktarına Göre</h4><p>Seyreltik ve derişik çözeltiler.</p></div><div class="info-box"><h4>Çözünürlüğe Etki Eden Faktörler</h4><p>Çözücü ve çözünenin türü, sıcaklık, basınç (yalnızca gazlarda), ortak iyon etkisi.</p></div><div class="info-box"><h4>Sıcaklık - Çözünürlük</h4><p>Çözünme endotermikse (çoğu katı) sıcaklıkla çözünürlük artar; ekzotermikse (gazlar) azalır.</p></div><div class="info-box"><h4>Basınç Etkisi (Gazlar)</h4><p>Sıcaklık sabitken gazın çözünürlüğü, çözeltinin üzerindeki gazın kısmi basıncıyla doğru orantılıdır (Henry yasası, C = k·P). Katı ve sıvıların çözünürlüğü basınçtan etkilenmez.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 6: Çıkmış Konular</h3><p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px">&quot;-&quot; o yıl bu konudan soru çıkmadığını gösterir. * işaretli satırlar doğrulanmamış bir listeden eklendi, ÖSYM kitapçığından teyit et.</p><table><thead><tr><th>Yıl</th><th>Konu</th></tr></thead><tbody><tr><td>2018</td><td>Çözünürlüğe etki eden faktörler</td></tr><tr><td>2019</td><td>Kaynama noktası yükselmesi (ΔT<sub>k</sub>)</td></tr><tr><td>2020</td><td>Donma noktası alçalması (ΔT<sub>d</sub>), iyon molaritesi</td></tr><tr><td>2021</td><td>Molalite, çözünürlük</td></tr><tr><td>2022</td><td>Molarite, kaynama noktası yükselmesi</td></tr><tr><td>2023</td><td>% derişim hesabı, iyon molaritesi</td></tr><tr><td>2024</td><td>İyon derişimi yüzdesi, koligatif özellikler</td></tr><tr><td>2025</td><td>İyon derişimleri, çözeltilerin karıştırılması, molarite*</td></tr><tr><td>2026</td><td>Donma noktası alçalması ve çözünürlük – sıcaklık grafiği*</td></tr></tbody></table></div>
+        </div>
+
+        <div id="notes-enerji" class="topic-notes">
+<div class="section-card"><h3 class="section-title">🔥 BÖLÜM 1: Temel Kavramlar</h3><div class="info-grid"><div class="info-box"><h4>Tepkimelerde Enerji</h4><p>Kimyasal tepkimelerde alınan veya verilen enerji <strong>potansiyel enerjidir</strong>. Sistemin toplam enerjisi, taneciklerin dönme, titreşim, öteleme hareketlerinden oluşan kinetik enerji ile tanecikler arası çekimlerden oluşan potansiyel enerjinin toplamıdır.</p></div><div class="info-box"><h4>Entalpi (H)</h4><p>H: entalpi, ΔH: entalpi değişimi. Entalpi bir <strong>hal fonksiyonudur</strong> ve doğrudan ölçülemez.</p></div><div class="info-box"><h4>Tepkime Isısı</h4><p>Sabit basınç ve sıcaklıkta gerçekleşen tepkimede alınan veya verilen ısı miktarıdır.<br><code style="color:var(--primary)">ΔH = H<sub>ürün</sub> − H<sub>giren</sub></code></p></div><div class="info-box"><h4>Molar Entalpi</h4><p>1 mol maddenin uğradığı fiziksel veya kimyasal olayın ısı değişimine molar entalpi denir.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🔥 BÖLÜM 2: Endotermik ve Ekzotermik Tepkimeler</h3><table><thead><tr><th>Özellik</th><th>Endotermik</th><th>Ekzotermik</th></tr></thead><tbody><tr><td>Isı</td><td>Sistem ısı alır (ısı girenler tarafında yazılır)</td><td>Sistem ısı verir (ısı ürünler tarafında yazılır)</td></tr><tr><td>ΔH</td><td>ΔH &gt; 0</td><td>ΔH &lt; 0</td></tr><tr><td>Enerji (PE – TK grafiği)</td><td>Girenler düşük, ürünler yüksek enerjili</td><td>Girenler yüksek, ürünler düşük enerjili</td></tr><tr><td>Entalpi</td><td>Zamanla artar</td><td>Zamanla azalır</td></tr><tr><td>Kararlılık</td><td>Düşük sıcaklıkta girenler, yüksek sıcaklıkta ürünler kararlı</td><td>Düşük sıcaklıkta ürünler, yüksek sıcaklıkta girenler kararlı</td></tr><tr><td>Gösterim</td><td>H₂O(k) + ısı → H₂O(s)</td><td>C(k) + O₂(g) → CO₂(g) + ısı</td></tr></tbody></table><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Bütün tepkimelerde <strong>düşük enerjili maddeler düşük sıcaklıkta, yüksek enerjili maddeler yüksek sıcaklıkta kararlıdır.</strong> Endotermik/ekzotermik olduğunu ısının hangi tarafta yazıldığından ve ΔH işaretinden anlarsın.</div><div class="info-grid"><div class="info-box"><h4>PE – Tepkime Koordinatı Grafiği (Aktivasyon Enerjisi)</h4><p><strong>İleri aktivasyon enerjisi (E<sub>a,i</sub>):</strong> girenlerin enerjisi ile aktifleşmiş kompleksin (en yüksek nokta) enerjisi arasındaki fark.<br><strong>Geri aktivasyon enerjisi (E<sub>a,g</sub>):</strong> ürünlerin enerjisi ile aktifleşmiş kompleksin enerjisi arasındaki fark.<br><code style="color:var(--primary)">ΔH = E<sub>a,i</sub> − E<sub>a,g</sub></code><br>Endotermikte E<sub>a,i</sub> &gt; E<sub>a,g</sub> (ΔH &gt; 0), ekzotermikte E<sub>a,i</sub> &lt; E<sub>a,g</sub> (ΔH &lt; 0). Katalizör ileri ve geri aktivasyon enerjisini aynı miktarda düşürür, ΔH değişmez.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🔥 BÖLÜM 3: Endotermik ve Ekzotermik Olaylar</h3><div class="info-grid"><div class="info-box"><h4>Endotermik Olaylar</h4><p>1) Erime, buharlaşma, süblimleşme<br>2) Katı ve sıvıların suda çözünmesi (genellikle). Örn: CaCO₃(k) + ısı → Ca²⁺(suda) + CO₃²⁻(suda)<br>3) Analiz (ayrışma) tepkimeleri (genellikle). Örn: H₂O(s) → H₂(g) + ½O₂(g) (elektroliz)<br>4) İyonlaşma enerjisi: X(g) + ısı → X⁺(g) + e⁻<br>5) Azot gazının yanması: ½N₂(g) + O₂(g) + ısı → NO₂(g)<br>6) Bağ kırılması: H–H + ısı → H• + •H</p></div><div class="info-box"><h4>Ekzotermik Olaylar</h4><p>1) Donma, yoğunlaşma, kırağılaşma<br>2) Gazların suda çözünmesi. Örn: O₂(g) → O₂(suda) + ısı<br>3) Sentez tepkimeleri (genellikle). Örn: C(k) + 2H₂(g) → CH₄(g) + ısı<br>4) Bağ oluşumu: H• + •H → H–H + ısı<br>5) N₂ gazının yanması hariç bütün yanmalar<br>6) Pil tepkimeleri<br>7) Nötrleşme (asit-baz) tepkimeleri<br>8) Bazı atomların elektron ilgisi (F + e⁻ → F⁻ + ısı, Cl için de aynı)</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Genel kuralların <strong>istisnaları</strong> sorulur: analiz tepkimeleri genelde endotermik ama NO₂(g) → ½N₂(g) + O₂(g) + ısı <strong>ekzotermiktir</strong>. Sentez tepkimeleri genelde ekzotermik ama N₂(g) + 2O₂(g) + ısı → 2NO₂(g) <strong>endotermiktir</strong>.</div></div>
+<div class="section-card"><h3 class="section-title">🔥 BÖLÜM 4: Oluşum Entalpisi</h3><div class="info-grid"><div class="info-box"><h4>Oluşum Tepkimesi</h4><p>Belirli sıcaklık ve basınçta <strong>1 mol bileşiğin, elementlerinin kararlı hallerinden</strong> oluşması tepkimesidir. Tepkimeye yalnızca kararlı elementler girmeli ve ürün tek bir bileşik olmalıdır. Bu tepkimenin entalpisine <strong>oluşum entalpisi</strong>, 25°C ve 1 atm'de 1 mol bileşik oluşurken olan değişime <strong>standart molar oluşum entalpisi</strong> denir.</p></div><div class="info-box"><h4>ΔH°<sub>f</sub> = 0 Olanlar</h4><p>Elementlerin doğada serbest hâlde bulundukları en kararlı hâlinin oluşum entalpisi sıfırdır. Allotroplardan doğada çok bulunan, kararlı olanı sıfırdır.<br><strong>Sıfır:</strong> Fe(k), C(grafit), Hg(s), O₂(g), H₂(g), H⁺(suda)<br><strong>Sıfır değil:</strong> Fe(s), C(elmas), O₃(g), N₂(s)</p></div><div class="info-box"><h4>Oluşum mu, Yanma mı?</h4><p>C(grafit) + O₂(g) → CO₂(g): ΔH, CO₂'nin <strong>oluşum</strong> entalpisidir.<br>CO(g) + ½O₂(g) → CO₂(g): ΔH <strong>yanma</strong> entalpisidir, oluşum entalpisi değildir (giren CO kararlı element değil).</p></div><div class="info-box"><h4>Oluşum Entalpisinden ΔH</h4><p>Oluşum tepkimesi olmayan tepkimelerin ΔH'ı da hesaplanabilir:<br><code style="color:var(--primary)">ΔH° = ΣH°<sub>f</sub>(ürünler) − ΣH°<sub>f</sub>(girenler)</code><br>Her değer mol katsayısıyla çarpılır.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🔥 BÖLÜM 5: Entalpiyi Etkileyen Faktörler ve Hess Yasası</h3><div class="info-grid"><div class="info-box"><h4>Standart Koşullar</h4><p>ΔH° 25°C ve 1 atm için geçerlidir; sıcaklık ve basınç değişirse entalpi değişir.</p></div><div class="info-box"><h4>Fiziksel Hal</h4><p>H₂(g) + ½O₂(g) → H₂O(g): ΔH = −242 kJ (Q₁)<br>H₂(g) + ½O₂(g) → H₂O(s): ΔH = −286 kJ (Q₂)<br>H₂(g) + ½O₂(g) → H₂O(k): ΔH = −291 kJ (Q₃)<br>Açığa çıkan ısı: <strong>Q₃ &gt; Q₂ &gt; Q₁</strong>. PE grafiğinde ürünün enerjisi ne kadar düşükse ısı o kadar büyüktür.</p></div><div class="info-box"><h4>Madde Miktarı</h4><p>Entalpi madde miktarına bağlıdır. CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(s), ΔH = −900 kJ: 1 mol CH₄ yanınca 900 kJ, 2 mol CH₄ yanınca 1800 kJ ısı açığa çıkar.</p></div><div class="info-box"><h4>İzlenen Yol</h4><p>Tepkimenin tek basamaklı veya mekanizmalı olması, yani izlenen yol, <strong>ΔH'ı değiştirmez</strong>.</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Ekzotermik tepkimelerde açığa çıkan ısı sıralaması Q<sub>katı</sub> &gt; Q<sub>sıvı</sub> &gt; Q<sub>gaz</sub> iken, ΔH değerleri negatif olduğundan matematiksel sıralama <strong>ΔH<sub>katı</sub> &lt; ΔH<sub>sıvı</sub> &lt; ΔH<sub>gaz</sub></strong> şeklindedir (−291 &lt; −286 &lt; −242). Soru "açığa çıkan ısı"yı mı yoksa "ΔH"ı mı sorduğuna dikkat et!</div><table><thead><tr><th>Hess Yasası</th><th>Kural</th><th>Örnek</th></tr></thead><tbody><tr><td>1</td><td>Tepkime ters çevrilirse ΔH işareti değişir</td><td>C(k) + O₂(g) → CO₂(g), ΔH = −393 kJ<br>CO₂(g) → C(k) + O₂(g), ΔH = +393 kJ</td></tr><tr><td>2</td><td>Tepkime bir sayıyla çarpılırsa ΔH aynı sayıyla çarpılır</td><td>2C(k) + 2O₂(g) → 2CO₂(g), ΔH = −786 kJ</td></tr><tr><td>3</td><td>Tepkimeler toplanırsa ΔH'lar da toplanır</td><td>ΔH = ΔH₁ + ΔH₂ + …</td></tr></tbody></table></div>
+<div class="section-card"><h3 class="section-title">🔥 BÖLÜM 6: Bağ Enerjileri</h3><div class="info-grid"><div class="info-box"><h4>Tanım</h4><p>Atomlar arasındaki kovalent bağı kırmak için gereken enerjiye <strong>bağ enerjisi</strong> denir. Bağ enerjisi her zaman <strong>pozitif</strong> değerdir.</p></div><div class="info-box"><h4>ΔH Hesabı</h4><p><code style="color:var(--primary)">ΔH = H<sub>bağ kırılması</sub> (giren) − H<sub>bağ oluşumu</sub> (ürün)</code><br>Girenler ve ürünler <strong>gaz fazında</strong> olmalıdır.</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Dikkat: oluşum entalpisinde <strong>ΔH = Σürün − Σgiren</strong>, bağ enerjisinde <strong>ΔH = Σgiren (kırılan) − Σürün (oluşan)</strong>. İşaretlerin tersi olması karıştırılır.</div></div>
+<div class="section-card"><h3 class="section-title">🔥 BÖLÜM 7: Çıkmış Konular</h3><p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px">&quot;-&quot; o yıl bu konudan soru çıkmadığını gösterir. * işaretli satırlar doğrulanmamış bir listeden eklendi, ÖSYM kitapçığından teyit et.</p><table><thead><tr><th>Yıl</th><th>Konu</th></tr></thead><tbody><tr><td>2018</td><td>Alınan–verilen ısı (fizikteki alınan = verilen ısı)</td></tr><tr><td>2019</td><td>Oluşum entalpisi</td></tr><tr><td>2020</td><td>Hess yasası</td></tr><tr><td>2021</td><td>Hess yasası</td></tr><tr><td>2022</td><td>Hess yasası</td></tr><tr><td>2023</td><td>Oluşum entalpisi</td></tr><tr><td>2024</td><td>Hess yasası</td></tr><tr><td>2025</td><td>Oluşum entalpisi (verilen üç tepkimeden hangisinin ΔH'ı oluşum entalpisidir)*</td></tr><tr><td>2026</td><td>Bağ enerjileri ve potansiyel enerji – tepkime koordinatı grafiği*</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: SİMÜLATÖR -->
+      <div id="sim-tab" class="tab-content">
+        <!-- Atom Simülatörü -->
+        <div id="sim-atom" class="topic-sim active sim-panel">
+          <h3 style="color: var(--primary); margin-bottom: 15px;">Z=1..30 Canlı Elektron Dizilimi ve Kuantum Sayısı Hesaplayıcı</h3>
+          <div style="margin-bottom: 20px;">
+            <label style="font-size:0.95rem; margin-right:10px;">Element Seçin:</label>
+            <select id="elementSelect" class="sim-select" onchange="runAtomSimulation()"></select>
+          </div>
+          <div id="atomSimOutput"></div>
+        </div>
+        
+        <!-- Gazlar Simülatörü -->
+        <div id="sim-gazlar" class="topic-sim sim-panel">
+          <h3 style="color: var(--primary); margin-bottom: 15px;">P.V = n.R.T İdeal Gaz Hesaplayıcı</h3>
+          <p style="margin-bottom: 20px; font-size:0.9rem; color:var(--text-muted);">Hesaplanmasını istediğiniz kutuyu BOŞ bırakıp diğerlerini doldurun.</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
+            <input type="number" id="gas-p" class="sim-input" placeholder="Basınç (P) - atm">
+            <input type="number" id="gas-v" class="sim-input" placeholder="Hacim (V) - Litre">
+            <input type="number" id="gas-n" class="sim-input" placeholder="Mol Sayısı (n)">
+            <input type="number" id="gas-t" class="sim-input" placeholder="Sıcaklık (T) - Kelvin">
+            <button class="sim-btn" onclick="runGasSimulation()">Hesapla</button>
+            <button class="sim-btn" style="background:#ef4444;" onclick="clearGasSim()">Temizle</button>
+          </div>
+          <div id="gasSimOutput" style="margin-top: 20px; font-size:1.1rem;"></div>
+        </div>
+
+        <!-- Çözeltiler Simülatörü -->
+        <div id="sim-sivi" class="topic-sim sim-panel">
+          <h3 style="color: var(--primary); margin-bottom: 15px;">Koligatif Özellik Hesaplayıcı (Sulu Çözelti)</h3>
+          <p style="margin-bottom: 20px; font-size:0.9rem; color:var(--text-muted);">Çözücü sabitlerini boş bırakırsan su alınır (K<sub>k</sub> = 0,52, K<sub>d</sub> = 1,86 °C/molal). Benzen gibi başka çözücü için kendi değerlerini gir. Çözünen uçucu değildir ve tamamen çözünür.</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
+            <select id="sol-sub" class="sim-select">
+              <option value="1">C₆H₁₂O₆ (glikoz) – 1 tanecik</option><option value="2">NaCl – 2 tanecik</option><option value="2">KCl – 2 tanecik</option><option value="3">CaCl₂ – 3 tanecik</option><option value="3">Na₂SO₄ – 3 tanecik</option><option value="3">K₂SO₄ – 3 tanecik</option><option value="4">Al(NO₃)₃ – 4 tanecik</option><option value="5">Al₂(SO₄)₃ – 5 tanecik</option>
+            </select>
+            <input type="number" id="sol-n" class="sim-input" placeholder="Çözünen mol sayısı">
+            <input type="number" id="sol-kg" class="sim-input" placeholder="Çözücü kütlesi - kg">
+            <input type="number" id="sol-kk" class="sim-input" placeholder="K_k (°C/molal) - boşsa su: 0,52">
+            <input type="number" id="sol-kd" class="sim-input" placeholder="K_d (°C/molal) - boşsa su: 1,86">
+            <button class="sim-btn" onclick="runSolSimulation()">Hesapla</button>
+            <button class="sim-btn" style="background:#ef4444;" onclick="clearSolSim()">Temizle</button>
+          </div>
+          <div id="solSimOutput" style="margin-top: 20px; font-size:1.05rem; line-height:1.7;"></div>
+        </div>
+
+        <!-- Enerji Simülatörü -->
+        <div id="sim-enerji" class="topic-sim sim-panel">
+          <h3 style="color: var(--primary); margin-bottom: 15px;">Tepkime Entalpisi Hesaplayıcı</h3>
+          <p style="margin-bottom: 20px; font-size:0.9rem; color:var(--text-muted);">Her kutuya "katsayı*değer" yaz, virgülle ayır (ondalık için nokta kullan). Katsayı yazmazsan 1 alınır. Örn: 2*-393, 1*-286</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; max-width: 360px;">
+            <select id="en-mode" class="sim-select">
+              <option value="form">Oluşum entalpileri: ΔH = Σürün − Σgiren</option>
+              <option value="bond">Bağ enerjileri: ΔH = Σkırılan − Σoluşan</option>
+            </select>
+            <input type="text" id="en-giren" class="sim-input" placeholder="Girenler (bağ enerjisinde: kırılan bağlar)">
+            <input type="text" id="en-urun" class="sim-input" placeholder="Ürünler (bağ enerjisinde: oluşan bağlar)">
+            <button class="sim-btn" onclick="runEnerjiSim()">Hesapla</button>
+            <button class="sim-btn" style="background:#ef4444;" onclick="clearEnerjiSim()">Temizle</button>
+          </div>
+          <div id="enerjiSimOutput" style="margin-top: 20px; font-size:1.05rem; line-height:1.7;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: FLASHCARDS -->
+      <div id="flashcards-tab" class="tab-content">
+        <div class="flashcards-container" id="flashcardsContainer">
+          <!-- JS Tarafından Konuya Göre Doldurulacak -->
+        </div>
+      </div>
+
+      <!-- TAB 4: QUIZ -->
+      <div id="quiz-tab" class="tab-content">
+        <div id="quizContainer">
+          <!-- JS Tarafından Konuya Göre Doldurulacak -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // --- VERİTABANI (Senin Orijinal 30 Elementin Eksiksiz Burada) ---
+    var elementsData = [
+      { z: 1, name: "Hidrojen (H)", config: "1s¹", e: [1] },
+      { z: 2, name: "Helyum (He)", config: "1s²", e: [2] },
+      { z: 3, name: "Lityum (Li)", config: "1s² 2s¹", e: [2, 1] },
+      { z: 4, name: "Berilyum (Be)", config: "1s² 2s²", e: [2, 2] },
+      { z: 5, name: "Bor (B)", config: "1s² 2s² 2p¹", e: [2, 3] },
+      { z: 6, name: "Karbon (C)", config: "1s² 2s² 2p²", e: [2, 4] },
+      { z: 7, name: "Azot (N)", config: "1s² 2s² 2p³", e: [2, 5] },
+      { z: 8, name: "Oksijen (O)", config: "1s² 2s² 2p⁴", e: [2, 6] },
+      { z: 9, name: "Flor (F)", config: "1s² 2s² 2p⁵", e: [2, 7] },
+      { z: 10, name: "Neon (Ne)", config: "1s² 2s² 2p⁶", e: [2, 8] },
+      { z: 11, name: "Sodyum (Na)", config: "[Ne] 3s¹", e: [2, 8, 1] },
+      { z: 12, name: "Magnezyum (Mg)", config: "[Ne] 3s²", e: [2, 8, 2] },
+      { z: 13, name: "Alüminyum (Al)", config: "[Ne] 3s² 3p¹", e: [2, 8, 3] },
+      { z: 14, name: "Silisyum (Si)", config: "[Ne] 3s² 3p²", e: [2, 8, 4] },
+      { z: 15, name: "Fosfor (P)", config: "[Ne] 3s² 3p³", e: [2, 8, 5] },
+      { z: 16, name: "Kükürt (S)", config: "[Ne] 3s² 3p⁴", e: [2, 8, 6] },
+      { z: 17, name: "Klor (Cl)", config: "[Ne] 3s² 3p⁵", e: [2, 8, 7] },
+      { z: 18, name: "Argon (Ar)", config: "[Ne] 3s² 3p⁶", e: [2, 8, 8] },
+      { z: 19, name: "Potasyum (K)", config: "[Ar] 4s¹", e: [2, 8, 8, 1] },
+      { z: 20, name: "Kalsiyum (Ca)", config: "[Ar] 4s²", e: [2, 8, 8, 2] },
+      { z: 21, name: "Skandiyum (Sc)", config: "[Ar] 4s² 3d¹", e: [2, 8, 9, 2] },
+      { z: 22, name: "Titanyum (Ti)", config: "[Ar] 4s² 3d²", e: [2, 8, 10, 2] },
+      { z: 23, name: "Vanadyum (V)", config: "[Ar] 4s² 3d³", e: [2, 8, 11, 2] },
+      { z: 24, name: "Krom (Cr) ⭐ ÖSYM İstisnası", config: "[Ar] 4s¹ 3d⁵", e: [2, 8, 13, 1], note: "Küresel simetri kazanmak için temel halde 4s¹ 3d⁵ dizilimine sahiptir! Uyarılmış durum DEĞİLDİR." },
+      { z: 25, name: "Mangan (Mn)", config: "[Ar] 4s² 3d⁵", e: [2, 8, 13, 2] },
+      { z: 26, name: "Demir (Fe)", config: "[Ar] 4s² 3d⁶", e: [2, 8, 14, 2] },
+      { z: 27, name: "Kobalt (Co)", config: "[Ar] 4s² 3d⁷", e: [2, 8, 15, 2] },
+      { z: 28, name: "Nikel (Ni)", config: "[Ar] 4s² 3d⁸", e: [2, 8, 16, 2] },
+      { z: 29, name: "Bakır (Cu) ⭐ ÖSYM İstisnası", config: "[Ar] 4s¹ 3d¹⁰", e: [2, 8, 18, 1], note: "Küresel simetri kazanmak için temel halde 4s¹ 3d¹⁰ dizilimine sahiptir! Uyarılmış durum DEĞİLDİR." },
+      { z: 30, name: "Çinko (Zn)", config: "[Ar] 4s² 3d¹⁰", e: [2, 8, 18, 2] }
+    ];
+
+    // Konu Bazlı Flashcard'lar (Senin 7 Kartın Atom'da, Benimkiler Gazlarda)
+    var flashcardsData = {
+      atom: [
+        { q: "Thomson Atom Modelinin ÖSYM tarafından en çok sorulan eksikliği nedir?", a: "Çekirdek ve nötron kavramlarının bulunmaması; pozitif ve negatif yüklerin rastgele dağıldığını öngörmesidir." },
+        { q: "Rutherford Altın Levha Deneyinde ışınların %99.99'unun sapmadan geçmesi neyi kanıtlar?", a: "Atomun çok büyük kısmının BOŞLUKLARDAN oluştuğunu kanıtlar." },
+        { q: "Heisenberg Belirsizlik İlkesi ne söyler?", a: "Bir elektronun konumu ve hızı (momentum) aynı anda kesin olarak ölçülemez!" },
+        { q: "24Cr ve 29Cu atomlarının elektron dizilimindeki ÖSYM istisnası nedir?", a: "4s² yerine 4s¹ ile biterler (Cr: [Ar] 4s¹ 3d⁵, Cu: [Ar] 4s¹ 3d¹⁰). Bu durum küresel simetri içindir ve UYARILMIŞ DURUM DEĞİLDİR!" },
+        { q: "Madelung-Klechkowski Kuralına göre 4s mi yoksa 3p mi önce elektronla dolar?", a: "3p'nin (n+l = 3+1 = 4) n değeri küçük olduğu için 3p orbitalinin enerjisi 4s'ten düşüktür ve önce dolar." },
+        { q: "26Fe atomundan 2 elektron koparılarak Fe²⁺ iyonu elde edilirken elektronlar hangi orbitalden kopar?", a: "Baş kuantum sayısı en büyük olan n=4 katmanındaki 4s orbitalinden kopar! (Dizilim: [Ar] 3d⁶ kalır)." },
+        { q: "Azot gazının (N₂) yanması endotermik midir yoksa ekzotermik midir?", a: "ENDOTERMİKTİR! N₂ yanması hariç diğer tüm yanma tepkimeleri ekzotermiktir." },
+        { q: "Periyot ve A grubu elektron diziliminden nasıl bulunur?", a: "Periyot = en büyük n. A grubu = son katmandaki (s+p) elektron sayısı. He istisna: 8A." },
+        { q: "İyonlaşma enerjisinde periyot boyunca iki istisna nedir?", a: "2A > 3A (Be>B, Mg>Al) ve 5A > 6A (N>O, P>S)." },
+        { q: "Ardışık iyonlaşma enerjilerindeki büyük sıçrama neyi gösterir?", a: "Değerlik elektronları bittikten sonra iç katmandan elektron koparıldığını; sıçramanın yeri değerlik elektron sayısını (grubu) verir." },
+        { q: "O²⁻, F⁻, Na⁺, Mg²⁺ yarıçap sıralaması?", a: "İzoelektronik olduklarından proton sayısı arttıkça yarıçap küçülür: O²⁻ > F⁻ > Na⁺ > Mg²⁺." },
+        { q: "En elektronegatif element hangisidir? Elektronegatiflik nasıl değişir?", a: "Flor. Periyotta soldan sağa artar, grupta aşağı inildikçe azalır." },
+        { q: "H ve O için yükseltgenme basamağı istisnaları?", a: "H genelde +1, metal hidrürlerde −1. O genelde −2, peroksitlerde −1, OF₂'de +2." },
+        { q: "Küresel simetrik bir tanecik diamanyetik olmak zorunda mıdır?", a: "Hayır. Fe³⁺ (3d⁵) yarı dolu olduğundan küresel simetriktir ama 5 çiftlenmemiş elektronla paramanyetiktir." },
+        { q: "Amfoter metaller hangileridir?", a: "Al, Zn, Cr, Sn, Pb, Be. Hem asitlerle hem kuvvetli bazlarla tepkime verirler." }
+      ],
+      gazlar: [
+        { q: "Gazların genleşme katsayısı hakkında ne söylenir?", a: "Tüm gazlar için aynıdır: normal şartlarda sıcaklık 1°C artarsa hacim 1/273 oranında artar." },
+        { q: "1 atm kaç cmHg, mmHg, torr, Pa'dır?", a: "76 cmHg = 760 mmHg = 760 torr = 101 325 Pa ≈ 10⁵ Pa ≈ 1 bar." },
+        { q: "Barometrede h yüksekliği neye bağlı, neye bağlı DEĞİL?", a: "Bağlı: sıvının cinsi, açık hava basıncı. Bağlı değil: sıvı miktarı, borunun şekli ve çapı." },
+        { q: "Normal koşul ve oda koşulunda 1 mol gazın hacmi?", a: "NK (0°C, 1 atm): 22,4 L. Oda koşulu (25°C, 1 atm): 24,5 L." },
+        { q: "Graham difüzyon yasasını yaz.", a: "V_A / V_B = √(T_A·Ma_B / T_B·Ma_A). Hafif ve sıcak gaz daha hızlı yayılır." },
+        { q: "Efüzyon hızı ile süre arasındaki ilişki?", a: "Ters orantılı: V_A / V_B = t_B / t_A." },
+        { q: "Yayılma hızı madde miktarına bağlı mıdır?", a: "HAYIR. Yayılma hızı v ∝ √(T/Ma) bağıntısına göre T ve Ma'ya bağlıdır." },
+        { q: "Hangi koşullarda gaz ideale yaklaşır?", a: "P düşük, T yüksek, Ma küçük ve molekül apolarsa (KN ve yoğunluk düşükse) ideale yaklaşır." },
+        { q: "R sabiti ne zaman 22,4/273, ne zaman 0,082 alınır?", a: "T 273 K ve katlarıysa 22,4/273; T = 200, 300 K gibi diğer durumlarda 0,082." },
+        { q: "Basınç - özkütle bağıntısı nedir?", a: "P·Ma = d·R·T (P·V = (m/Ma)·R·T'den türer)." },
+        { q: "Gaz karışımında kısmi basınç nasıl bulunur?", a: "P_x = P_T · (n_x / n_T) = P_T · X_x. Mol kesirleri toplamı 1'dir." },
+        { q: "Su üzerinde toplanan gazın toplam basıncı?", a: "P_T = P_gaz + P_H₂O. Sıcaklık değişmedikçe H₂O'nun buhar basıncı sabittir." },
+        { q: "Sabit hacimli kapta sonradan He eklenirse O₂'nin kısmi basıncı değişir mi?", a: "Değişmez. Pistonlu kapta ise hacim artacağı için O₂'nin kısmi basıncı azalır." },
+        { q: "Suyun ve CO₂'nin üçlü noktaları?", a: "Su: 0,01°C ve 0,006 atm. CO₂: −57°C ve 5,2 atm. Suyun katı-sıvı eğrisi sola yatıktır." },
+        { q: "Joule-Thomson olayı nedir?", a: "Sıkıştırılmış gerçek gazın ani genleşirken soğumasıdır. Buzdolabı bu olaya dayanır." },
+        { q: "Bağıl nem formülü nedir?", a: "Bağıl nem % = (havadaki kısmi buhar basıncı / saf suyun BB) × 100." },
+        { q: "Sıcaklık iki katına (°C) çıkarsa kinetik enerji iki katına çıkar mı?", a: "HAYIR! Orantı sadece KELVİN sıcaklığı ile kurulabilir." }
+      ],
+      sivi: [
+        { q: "Molarite formüllerini yaz.", a: "M = n / V(L) ve M = %c · d · 10 / Ma." },
+        { q: "Molalite neye göre hesaplanır?", a: "m = n(çözünen) / kg(çözücü). Paydada çözeltinin değil çözücünün kütlesi bulunur." },
+        { q: "Mol kesrinin birimi nedir? Toplamları kaçtır?", a: "Birimsizdir. X_a + X_b = 1." },
+        { q: "ppm nedir?", a: "Milyonda bir. 1 kg'lık çözeltide çözünenin mg miktarıdır; sulu çözeltide 1 L çözeltideki çözünenin mg'ıdır." },
+        { q: "Aynı cins çözeltiler karıştırılınca iyon derişimi nasıl bulunur?", a: "Her iyon için ayrı ayrı M₁V₁ + M₂V₂ = M_s·V_s yazılır." },
+        { q: "0,5 M Al₂(SO₄)₃ çözeltisinde iyon derişimleri?", a: "[Al³⁺] = 1 M, [SO₄²⁻] = 1,5 M, toplam 2,5 M." },
+        { q: "Ebülyoskopi ve kriyoskopi nedir?", a: "Ebülyoskopi: KN yükselmesinden çözünenin Ma'sını bulma. Kriyoskopi: DN alçalmasından Ma bulma." },
+        { q: "ΔT_k ve ΔT_d formülleri ve suyun sabitleri?", a: "ΔT_k = K_k·m (0,52 °C/m), ΔT_d = K_d·m (1,86 °C/m). m toplam tanecik molalitesidir." },
+        { q: "Eşit derişimli Al(NO₃)₃, Na₂SO₄, KCl çözeltilerinin KN sıralaması?", a: "Tanecik sayısı 4 > 3 > 2 olduğundan KN: Al(NO₃)₃ > Na₂SO₄ > KCl." },
+        { q: "Çözünen uçucuysa çözeltinin KN'si için ne söylenir?", a: "100°C'den küçük veya büyük olabilir; çözünenin kaynama noktasına bağlıdır." },
+        { q: "Saf maddeyle çözeltinin ısınma grafiği nasıl farklıdır?", a: "Saf maddede kaynama sırasında sıcaklık sabit. Doymamış çözeltide sıcaklık değişir, doymuş olunca sabitlenir; kaynama saf maddeden yüksek sıcaklıkta başlar." },
+        { q: "Buhar basıncı nelere bağlıdır, neye bağlı değildir?", a: "Bağlı: sıvının cinsi, sıcaklık, saflık. Bağlı değil: açık hava basıncı. KN küçük olanın BB'si büyüktür." },
+        { q: "Raoult yasasını yaz.", a: "Katı-sıvı: P = P°_A·X_A. Sıvı-sıvı: P = P°_A·X_A + P°_B·X_B." },
+        { q: "Dibinde katısı olan çözelti hangi türdür?", a: "Doymuş çözeltidir (aşırı doymuş değildir)." },
+        { q: "Çözünürlüğe etki eden faktörler?", a: "Çözücü ve çözünenin türü, sıcaklık, basınç (gazlarda), ortak iyon etkisi." },
+        { q: "Çözünürlük sıcaklıkla nasıl değişir?", a: "Endotermik çözünmede (çoğu katı) artar; ekzotermikte (gazlar) azalır." },
+        { q: "Doymamış, doymuş ve aşırı doymuş çözelti nedir?", a: "Doymamış: çözebileceğinden az çözünen var. Doymuş: en fazla miktar çözülmüş, dibinde katı olabilir. Aşırı doymuş: çözebileceğinden fazla çözünen var, kararsızdır; çalkalanınca veya kristal atılınca fazlası çöker." },
+        { q: "Ozmoz, ozmotik basınç ve ters ozmoz nedir?", a: "Ozmoz: çözücünün yarı geçirgen zardan seyreltikten derişik çözeltiye geçmesi. Ozmotik basınç: ozmozu durdurmak için derişik tarafa uygulanan basınç. Ters ozmoz: ozmotik basınçtan büyük basınçla çözücünün derişikten seyreltiğe geçirilmesi." },
+        { q: "Buhar basıncının 3S kuralı nedir?", a: "Sıcaklık (artarsa BB artar), Sıvının cinsi (tanecikler arası çekim), Saflık (uçucu olmayan madde eklenirse BB düşer). Hacim, piston, kap şekli ve dış basınca bağlı değildir." },
+        { q: "Hidratlaşma ile solvatlaşma farkı nedir?", a: "Çözünen taneciklerin çözücü molekülleriyle sarılması solvatlaşmadır; çözücü su ise hidratlaşma denir." },
+        { q: "Çözünürlük eğrisinde üstü, üzeri ve altı neyi gösterir?", a: "Eğrinin üzeri: doymuş. Altı: doymamış. Üstü: aşırı doymuş veya fazlası çökmüş (dibinde katılı) bölge." }
+      ],
+      enerji: [
+        { q: "Entalpi nedir, nasıl bulunur?", a: "H entalpi bir hal fonksiyonudur, doğrudan ölçülemez. Değişimi ΔH = H_ürün − H_giren ile bulunur." },
+        { q: "Endotermik tepkimenin özellikleri?", a: "ΔH > 0, ısı girenler tarafında yazılır, girenler düşük ürünler yüksek enerjili, entalpi zamanla artar." },
+        { q: "Ekzotermik tepkimenin özellikleri?", a: "ΔH < 0, ısı ürünler tarafında yazılır, girenler yüksek ürünler düşük enerjili, entalpi zamanla azalır." },
+        { q: "Endotermik tepkimede hangi sıcaklıkta hangi taraf kararlıdır?", a: "Düşük sıcaklıkta girenler, yüksek sıcaklıkta ürünler. Ekzotermikte tersi: düşük sıcaklıkta ürünler, yüksek sıcaklıkta girenler." },
+        { q: "Endotermik olaylar hangileridir?", a: "Erime, buharlaşma, süblimleşme; katı/sıvıların suda çözünmesi (genelde); analiz tepkimeleri (genelde); iyonlaşma; N₂'nin yanması; bağ kırılması." },
+        { q: "Ekzotermik olaylar hangileridir?", a: "Donma, yoğunlaşma, kırağılaşma; gazların suda çözünmesi; sentez (genelde); bağ oluşumu; N₂ hariç yanmalar; pil; nötrleşme; bazı elektron ilgileri (F, Cl)." },
+        { q: "Analiz ve sentez tepkimelerinde istisnalar?", a: "NO₂(g) → ½N₂ + O₂ + ısı ekzotermik analizdir. N₂ + 2O₂ + ısı → 2NO₂ endotermik sentezdir." },
+        { q: "Oluşum tepkimesi olmanın şartı?", a: "Yalnızca kararlı elementler girer, 1 mol bileşik oluşur. Standart molar oluşum entalpisi 25°C ve 1 atm'dedir." },
+        { q: "Hangi maddelerin standart oluşum entalpisi sıfırdır?", a: "Kararlı element hâlleri: Fe(k), C(grafit), Hg(s), O₂(g), H₂(g), H⁺(suda). Sıfır değil: Fe(s), C(elmas), O₃(g), N₂(s)." },
+        { q: "Oluşum entalpilerinden tepkime entalpisi nasıl bulunur?", a: "ΔH° = ΣH°f(ürünler) − ΣH°f(girenler); her değer mol katsayısıyla çarpılır." },
+        { q: "Entalpi hangi etkenlere bağlıdır, hangisine bağlı değildir?", a: "Bağlı: sıcaklık/basınç (standart koşul), maddenin fiziksel hâli, madde miktarı. Bağlı değil: izlenen yol (tek basamak veya mekanizma)." },
+        { q: "H₂O(g), H₂O(s), H₂O(k) oluşurken açığa çıkan ısı sıralaması?", a: "Q(k) > Q(s) > Q(g). Ürünün enerjisi düştükçe açığa çıkan ısı artar." },
+        { q: "Hess yasasının üç kuralı?", a: "Ters çevirince ΔH işareti değişir. Bir sayıyla çarpınca ΔH de çarpılır. Tepkimeler toplanınca ΔH'lar toplanır." },
+        { q: "Bağ enerjisi nedir? İşareti?", a: "Kovalent bağı kırmak için gereken enerji; her zaman pozitiftir." },
+        { q: "Bağ enerjisinden ΔH nasıl hesaplanır?", a: "ΔH = Σ(kırılan bağ) − Σ(oluşan bağ). Girenler ve ürünler gaz fazında olmalıdır." },
+        { q: "Ekzotermik tepkimede ısı sıralaması Q(katı) > Q(sıvı) > Q(gaz) ise ΔH sıralaması nedir?", a: "ΔH negatif olduğundan ΔH(katı) < ΔH(sıvı) < ΔH(gaz). Örn: −291 < −286 < −242 kJ." },
+        { q: "ΔH ile ileri ve geri aktivasyon enerjileri arasındaki bağıntı nedir?", a: "ΔH = Ea(ileri) − Ea(geri). Katalizör ikisini de aynı miktarda düşürür, ΔH değişmez." }
+      ]
+    };
+
+    // Konu Bazlı Testler (ans = doğru şıkkın indeksi)
+    var quizData = {
+      atom: [
+        { question: "1. Aşağıdaki ifadelerden hangisi YANLIŞTIR?",
+          options: ["A) Baş kuantum sayısı (n) enerji düzeyini belirtir.", "B) l = 2 değeri d orbitallerini temsil eder.", "C) d alt kabuğunda m\u2097 için 5 farklı değer vardır.", "D) n = 2 katmanında l = 2 değeri bulunabilir.", "E) Spin kuantum sayısı +1/2 veya -1/2 değerini alır."],
+          ans: 3, sol: "l = 0 ... n-1 değerlerini alır. n=2 için l yalnızca 0 ve 1 olabilir; d orbitali (l=2) 3. katmandan başlar." },
+        { question: "2. ₂₆Fe²⁺ iyonunun elektron dizilimi aşağıdakilerden hangisidir?",
+          options: ["A) [Ar] 4s² 3d⁴", "B) [Ar] 3d⁶", "C) [Ar] 4s¹ 3d⁵", "D) [Ar] 4s² 3d⁶", "E) [Ar] 3d⁸"],
+          ans: 1, sol: "Katyonda elektron n'si en büyük orbitalden kopar: önce 4s²'deki 2 elektron gider, geriye [Ar] 3d⁶ kalır." },
+        { question: "3. ₂₄Cr atomunun temel hal dizilimi [Ar] 4s¹ 3d⁵ şeklindedir. Bu durum için hangisi doğrudur?",
+          options: ["A) Uyarılmış haldir.", "B) Küresel simetri nedeniyle temel haldir.", "C) Aufbau ilkesine uyar, istisna değildir.", "D) Diamanyetiktir.", "E) Pauli ilkesine aykırıdır."],
+          ans: 1, sol: "Yarı dolu d alt kabuğu küresel simetri sağladığı için bu dizilim TEMEL haldir. 6 yarı dolu orbital olduğundan paramanyetiktir." },
+        { question: "4. Baş kuantum sayısı n = 3 olan katmanda toplam kaç orbital bulunur?",
+          options: ["A) 3", "B) 6", "C) 9", "D) 12", "E) 18"],
+          ans: 2, sol: "n. katmanda n² orbital vardır: 3s (1) + 3p (3) + 3d (5) = 9." },
+        { question: "5. Aşağıdaki atomlardan hangisi paramanyetiktir?",
+          options: ["A) ₁₂Mg", "B) ₁₀Ne", "C) ₇N", "D) ₃₀Zn", "E) ₂₀Ca"],
+          ans: 2, sol: "₇N: 2p³ yarı dolu, 3 çiftlenmemiş elektron içerir. Diğerlerinin tüm orbitalleri tam doludur (diamanyetik)." },
+        { question: "6. ₁₁Na, ₁₂Mg ve ₁₃Al atomlarının birinci iyonlaşma enerjileri için hangisi doğrudur?",
+          options: ["A) Na > Mg > Al","B) Mg > Al > Na","C) Al > Mg > Na","D) Mg > Na > Al","E) Na > Al > Mg"],
+          ans: 1, sol: "Mg'un 3s² alt kabuğu tam dolu olduğundan İE₁(Mg) > İE₁(Al). Na en düşüktür: Mg > Al > Na." },
+        { question: "7. O²⁻, F⁻, Na⁺ ve Mg²⁺ taneciklerinin yarıçap sıralaması nasıldır?",
+          options: ["A) Mg²⁺ > Na⁺ > F⁻ > O²⁻","B) O²⁻ > F⁻ > Na⁺ > Mg²⁺","C) F⁻ > O²⁻ > Na⁺ > Mg²⁺","D) Na⁺ > Mg²⁺ > O²⁻ > F⁻","E) O²⁻ = F⁻ = Na⁺ = Mg²⁺"],
+          ans: 1, sol: "Hepsi 10 elektronludur (izoelektronik). Proton sayısı arttıkça çekim artar, yarıçap küçülür." },
+        { question: "8. KMnO₄ bileşiğinde Mn'nin yükseltgenme basamağı kaçtır?",
+          options: ["A) +2","B) +4","C) +6","D) +7","E) +8"],
+          ans: 3, sol: "K = +1, O = −2: 1 + x + 4(−2) = 0 → x = +7." },
+        { question: "9. Aşağıdaki taneciklerden hangisi küresel simetrik olduğu halde paramanyetiktir?",
+          options: ["A) ₁₂Mg","B) ₂₆Fe³⁺","C) ₃₀Zn","D) ₂₀Ca²⁺","E) ₁₀Ne"],
+          ans: 1, sol: "Fe³⁺: [Ar] 3d⁵ yarı dolu (küresel simetri) ama 5 çiftlenmemiş elektron vardır → paramanyetik. Diğerleri tam dolu (diamanyetik)." },
+        { question: "10. Bir elementin ardışık iyonlaşma enerjileri (kJ/mol): İE₁ = 496, İE₂ = 4562, İE₃ = 6910. Bu element periyodik sistemin hangi grubundadır?",
+          options: ["A) 1A","B) 2A","C) 3A","D) 7A","E) 8A"],
+          ans: 0, sol: "Büyük sıçrama İE₁'den sonra (İE₂'de) olduğundan tek değerlik elektronu vardır → 1A." }
+      ],
+      gazlar: [
+        { question: "1. Sabit basınçta 27°C'de 3 L hacim kaplayan ideal gaz 127°C'ye ısıtılırsa hacmi kaç L olur?",
+          options: ["A) 3","B) 4","C) 6","D) 9","E) 12"],
+          ans: 1, sol: "Charles yasası, Kelvin ile: T₁ = 300 K, T₂ = 400 K → V₂ = 3 × 400/300 = 4 L." },
+        { question: "2. Sabit sıcaklıkta 4 atm basınçtaki 2 L gaz 8 L'ye genleştirilirse basınç kaç atm olur?",
+          options: ["A) 0,5","B) 1","C) 2","D) 8","E) 16"],
+          ans: 1, sol: "Boyle yasası: P₁V₁ = P₂V₂ → 4 × 2 = P₂ × 8 → P₂ = 1 atm." },
+        { question: "3. Aynı koşullarda He gazının difüzyon hızı XO₂ gazının 4 katıdır. X elementinin mol kütlesi kaç g/mol'dür? (He: 4, O: 16)",
+          options: ["A) 8","B) 16","C) 32","D) 48","E) 64"],
+          ans: 2, sol: "4 = √(Ma/4) → Ma(XO₂) = 64 → X = 64 − 32 = 32 g/mol." },
+        { question: "4. Normal koşullarda (0°C, 1 atm) 0,5 mol ideal gaz kaç L hacim kaplar?",
+          options: ["A) 5,6","B) 11,2","C) 22,4","D) 33,6","E) 44,8"],
+          ans: 1, sol: "NK'de 1 mol gaz 22,4 L'dir. 0,5 mol → 11,2 L." },
+        { question: "5. Özkütlesi 8,4 g/L ve mol kütlesi 84 g/mol olan ideal gazın 273 K'deki basıncı kaç atm'dir? (R = 22,4/273)",
+          options: ["A) 0,224","B) 1,12","C) 2,24","D) 4,48","E) 22,4"],
+          ans: 2, sol: "P·Ma = d·R·T → P·84 = 8,4 · (22,4/273) · 273 → P = 2,24 atm." },
+        { question: "6. 1 L'lik 1 atm H₂, 2 L'lik vakum kabı ve 1 L'lik 1 atm He, musluklarla birbirine bağlıdır. Musluklar açılınca (sabit T) karışımın basıncı kaç atm olur?",
+          options: ["A) 0,25","B) 0,5","C) 1","D) 2","E) 4"],
+          ans: 1, sol: "1·1 + 1·1 = P_s · 4 → P_s = 0,5 atm." },
+        { question: "7. Pistonlu kapta 400 K'de 2 L azot gazı vardır. Basınç sabit tutularak mol sayısı 2 katına çıkarılıp sıcaklık 300 K'e düşürülürse hacim kaç L olur?",
+          options: ["A) 1","B) 2","C) 3","D) 4","E) 6"],
+          ans: 2, sol: "V₁/V₂ = (n₁T₁)/(n₂T₂) → 2/V₂ = (1·400)/(2·300) → V₂ = 3 L." },
+        { question: "8. 20°C'de sıvı su ile dengedeki gaz sisteminin toplam basıncı 80 mmHg'dır. Piston itilerek gaz hacmi yarıya indirilip denge sağlanırsa son toplam basınç kaç mmHg olur? (20°C'de suyun BB = 20 mmHg)",
+          options: ["A) 100","B) 120","C) 140","D) 160","E) 180"],
+          ans: 2, sol: "P(He) = 80 − 20 = 60. Hacim yarıya inince 120. P_T = 120 + 20 = 140 mmHg." },
+        { question: "9. Su üzerinde toplanan O₂'nin kısmi basıncını hesaplamak için I. toplam basınç, II. aynı sıcaklıkta suyun buhar basıncı, III. toplanan gazın toplam hacmi bilgilerinden hangileri gereklidir?",
+          options: ["A) Yalnız I","B) Yalnız III","C) I ve II","D) II ve III","E) I, II ve III"],
+          ans: 2, sol: "P_T = P(O₂) + P(H₂O) olduğundan toplam basınç ve suyun buhar basıncı yeterlidir." }
+      ],
+      sivi: [
+        { question: "1. Kütlece %50'lik, yoğunluğu 0,92 g/mL olan etanol (C₂H₅OH = 46) çözeltisinin molaritesi kaç M'dır?",
+          options: ["A) 5","B) 8","C) 10","D) 12","E) 20"],
+          ans: 2, sol: "M = %c·d·10/Ma = 50·0,92·10/46 = 10 M." },
+        { question: "2. 0,1 M 200 mL NaCl ile 0,2 M 300 mL NaCl çözeltileri karıştırılırsa [Cl⁻] kaç M olur?",
+          options: ["A) 0,12","B) 0,15","C) 0,16","D) 0,18","E) 0,30"],
+          ans: 2, sol: "M_s = (0,1·200 + 0,2·300)/500 = 80/500 = 0,16 M." },
+        { question: "3. 0,5 M Al₂(SO₄)₃ çözeltisinde toplam iyon derişimi kaç M'dır?",
+          options: ["A) 1","B) 1,5","C) 2","D) 2,5","E) 3"],
+          ans: 3, sol: "Al₂(SO₄)₃ → 2Al³⁺ + 3SO₄²⁻: 0,5·(2+3) = 2,5 M." },
+        { question: "4. Eşit derişimli I. Al(NO₃)₃, II. Na₂SO₄, III. KCl sulu çözeltilerinin kaynama noktası sıralaması nedir?",
+          options: ["A) I > II > III","B) III > II > I","C) II > I > III","D) I = II = III","E) II > III > I"],
+          ans: 0, sol: "Tanecik sayıları 4, 3, 2'dir. Tanecik arttıkça KN artar." },
+        { question: "5. 0,2 mol moleküler organik bileşik benzende çözülüyor; KN saf benzenden 10,4°C yüksek. K_k = 2,6 °C/m ise kaç g benzen kullanılmıştır?",
+          options: ["A) 20","B) 40","C) 50","D) 80","E) 100"],
+          ans: 2, sol: "10,4 = 2,6·m → m = 4 molal. 4 = 0,2/kg → kg = 0,05 = 50 g." },
+        { question: "6. 500 g su ile hazırlanan sulu CaCl₂ çözeltisi saf sudan 5,58°C düşük sıcaklıkta donmaya başlıyor (K_d = 1,86). Çözeltide kaç mol Ca²⁺ vardır?",
+          options: ["A) 0,25","B) 0,5","C) 1","D) 1,5","E) 3"],
+          ans: 1, sol: "5,58 = 1,86·m → m = 3 molal tanecik → CaCl₂ 1 molal. n = 1·0,5 = 0,5 mol." },
+        { question: "7. 1 molal C₆H₁₂O₆ çözeltisi (100 + a)°C'de kaynamaya başlıyorsa 0,5 molal Al(NO₃)₃ çözeltisi kaç °C'de kaynar?",
+          options: ["A) 100 + a/2","B) 100 + a","C) 100 + 2a","D) 100 + 4a","E) 100 + 8a"],
+          ans: 2, sol: "Glikoz 1 molal tanecik = a. Al(NO₃)₃: 0,5·4 = 2 molal tanecik → 2a." },
+        { question: "8. 1 molal K₂SO₄ çözeltisi 100°C'de kaynıyorsa saf su kaç °C'de kaynardı? (K_k = 0,52)",
+          options: ["A) 98,44","B) 99,48","C) 100","D) 101,56","E) 102,08"],
+          ans: 0, sol: "3 molal tanecik: ΔT_k = 0,52·3 = 1,56°C. Saf su 100 − 1,56 = 98,44°C'de kaynar." },
+        { question: "9. 30°C'de saf suyun BB'si 32 mmHg'dır. 108 g suda 85 g NaNO₃ (85 g/mol) çözülürse çözeltinin BB'si kaç mmHg olur? (H₂O = 18)",
+          options: ["A) 16","B) 24","C) 28","D) 30","E) 32"],
+          ans: 1, sol: "n(su) = 6, n(Na⁺) = n(NO₃⁻) = 1 → n_T = 8. P = 32·6/8 = 24 mmHg." },
+        { question: "10. KNO₃ çözünürlüğü: 18°C'de 30 g/100 g su, 58°C'de 110 g/100 g su. 18°C'de 45 g KNO₃ ile doygun çözelti hazırlanıp 50 g su eklenerek 58°C'ye ısıtılıyor. Tekrar doygun olması için en az kaç g KNO₃ eklenmelidir?",
+          options: ["A) 45","B) 85","C) 130","D) 175","E) 220"],
+          ans: 3, sol: "18°C'de 45 g için 150 g su gerekir; 50 g eklenince 200 g su. 58°C'de 200 g suda 220 g çözünür → 220 − 45 = 175 g." },
+        { question: "11. 0,1 mol I₂ (254 g/mol'den 25,4 g) 2500 mL etil alkolde (d = 0,8 g/mL) çözülüyor. Çözeltinin molalitesi kaçtır?",
+          options: ["A) 0,04","B) 0,05","C) 0,1","D) 0,5","E) 2"],
+          ans: 1, sol: "m(alkol) = 0,8·2500 = 2000 g = 2 kg. m = 0,1/2 = 0,05 molal." }
+      ],
+      enerji: [
+        { question: "1. Aşağıdakilerden hangisi endotermik bir olaydır?",
+          options: ["A) Donma","B) Yoğunlaşma","C) Bağ oluşumu","D) Süblimleşme","E) Nötrleşme"],
+          ans: 3, sol: "Süblimleşme, erime ve buharlaşma gibi ısı alan (endotermik) bir olaydır. Diğerleri ekzotermiktir." },
+        { question: "2. Aşağıdakilerden hangisi ekzotermiktir?",
+          options: ["A) Buharlaşma","B) İyonlaşma","C) Gazların suda çözünmesi","D) Bağ kırılması","E) N₂ gazının yanması"],
+          ans: 2, sol: "Gazların suda çözünmesi ekzotermiktir. Diğerlerinin hepsi endotermiktir (N₂'nin yanması istisnadır)." },
+        { question: "3. Aşağıdaki maddelerden hangisinin standart molar oluşum entalpisi sıfırdır?",
+          options: ["A) C(elmas)","B) O₃(g)","C) Hg(s)","D) Fe(s)","E) H₂O(g)"],
+          ans: 2, sol: "Elementin 25°C ve 1 atm'deki en kararlı hâlinin oluşum entalpisi sıfırdır: Hg(s). Elmas, O₃ ve sıvı demir kararlı hâl değildir." },
+        { question: "4. Aşağıdaki tepkimelerden hangisinin entalpi değişimi, ürünün standart molar oluşum entalpisidir?",
+          options: ["A) CO(g) + ½O₂(g) → CO₂(g)","B) C(grafit) + O₂(g) → CO₂(g)","C) 2C(grafit) + 2O₂(g) → 2CO₂(g)","D) C(elmas) + O₂(g) → CO₂(g)","E) N₂O₄(g) → 2NO₂(g)"],
+          ans: 1, sol: "Kararlı elementlerden (grafit, O₂) 1 mol bileşik oluşuyor. C'de 2 mol, D'de kararlı olmayan elmas, A ve E'de kararlı elementler girmiyor." },
+        { question: "5. C₂H₂, CO₂ ve H₂O'nun standart molar oluşum entalpileri sırasıyla +226, −393 ve −286 kJ'dir. C₂H₂(g) + 5/2 O₂(g) → 2CO₂(g) + H₂O(s) tepkimesinin ΔH'ı kaç kJ'dir?",
+          options: ["A) −1298","B) −1072","C) −846","D) +1298","E) +846"],
+          ans: 0, sol: "ΔH = [2(−393) + (−286)] − (+226) = −1072 − 226 = −1298 kJ." },
+        { question: "6. C(k) + O₂(g) → CO₂(g) tepkimesinin ΔH'ı −393 kJ'dir. 2CO₂(g) → 2C(k) + 2O₂(g) tepkimesinin ΔH'ı kaç kJ'dir?",
+          options: ["A) −786","B) −393","C) +393","D) +786","E) +196,5"],
+          ans: 3, sol: "Tepkime ters çevrilince işaret değişir, 2 ile çarpılınca ΔH de 2 katı olur: +786 kJ." },
+        { question: "7. H–H, Cl–Cl ve H–Cl bağ enerjileri sırasıyla 436, 243 ve 431 kJ/mol'dür. H₂(g) + Cl₂(g) → 2HCl(g) tepkimesinin ΔH'ı kaç kJ'dir?",
+          options: ["A) −183","B) −862","C) +183","D) +679","E) −679"],
+          ans: 0, sol: "ΔH = (kırılan) − (oluşan) = (436 + 243) − 2·431 = 679 − 862 = −183 kJ." },
+        { question: "8. H₂(g) + ½O₂(g) tepkimesinde H₂O(g), H₂O(s) ve H₂O(k) oluşurken açığa çıkan ısılar sırasıyla Q₁, Q₂, Q₃'tür. Bunların sıralaması nasıldır?",
+          options: ["A) Q₁ > Q₂ > Q₃","B) Q₃ > Q₂ > Q₁","C) Q₂ > Q₁ > Q₃","D) Q₁ = Q₂ = Q₃","E) Q₂ > Q₃ > Q₁"],
+          ans: 1, sol: "Ürünün enerjisi gaz > sıvı > katı sırasında azalır; ürün ne kadar düşük enerjiliyse açığa çıkan ısı o kadar fazladır: Q₃ > Q₂ > Q₁." },
+        { question: "9. Endotermik bir tepkimeyle ilgili hangisi doğrudur?",
+          options: ["A) Girenlerin enerjisi ürünlerinkinden yüksektir.","B) ΔH < 0'dır.","C) Entalpi zamanla artar.","D) Düşük sıcaklıkta ürünler kararlıdır.","E) Isı açığa çıkar."],
+          ans: 2, sol: "Endotermikte ΔH > 0, girenler düşük ürünler yüksek enerjili, entalpi zamanla artar. Düşük sıcaklıkta girenler kararlıdır." },
+        { question: "10. CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(s), ΔH = −900 kJ. 8 g CH₄ (16 g/mol) yandığında kaç kJ ısı açığa çıkar?",
+          options: ["A) 225","B) 450","C) 900","D) 1800","E) 112,5"],
+          ans: 1, sol: "8 g = 0,5 mol CH₄. Entalpi madde miktarıyla orantılıdır: 0,5 · 900 = 450 kJ." }
+      ]
+    };
+
+    var currentTopic = 'atom';
+    var SUP = { '⁰':0,'¹':1,'²':2,'³':3,'⁴':4,'⁵':5,'⁶':6,'⁷':7,'⁸':8,'⁹':9 };
+    var ORB = { s:1, p:3, d:5, f:7 }, LNUM = { s:0, p:1, d:2, f:3 };
+
+    function switchTab(id) {
+      document.querySelectorAll('.tab-content').forEach(function (t) { t.classList.toggle('active', t.id === id); });
+      document.querySelectorAll('.tab-btn').forEach(function (b) {
+        b.classList.toggle('active', (b.getAttribute('onclick') || '').indexOf("'" + id + "'") > -1);
+      });
+    }
+
+    function changeTopic(id, title, btn) {
+      currentTopic = id;
+      document.querySelectorAll('.topic-btn').forEach(function (b) { b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      document.querySelectorAll('.topic-notes').forEach(function (e) { e.classList.toggle('active', e.id === 'notes-' + id); });
+      document.querySelectorAll('.topic-sim').forEach(function (e) { e.classList.toggle('active', e.id === 'sim-' + id); });
+      document.getElementById('headerTitle').innerHTML = 'Bölüm: <span>' + title + '</span>';
+      renderFlashcards();
+      renderQuiz();
+      switchTab('notes-tab');
+      document.querySelector('.main-wrapper').scrollTop = 0;
+    }
+
+    function renderFlashcards() {
+      var box = document.getElementById('flashcardsContainer');
+      var list = flashcardsData[currentTopic] || [];
+      box.innerHTML = '';
+      list.forEach(function (c) {
+        var d = document.createElement('div');
+        d.className = 'flashcard';
+        d.innerHTML = '<div class="flashcard-inner"><div class="flashcard-front"><p>' + c.q + '</p></div><div class="flashcard-back"><p>' + c.a + '</p></div></div>';
+        d.onclick = function () { d.classList.toggle('flipped'); };
+        box.appendChild(d);
+      });
+      if (!list.length) box.innerHTML = '<p style="color:var(--text-muted)">Bu konu için henüz bilgi kartı yok.</p>';
+    }
+
+    function renderQuiz() {
+      var box = document.getElementById('quizContainer');
+      var list = quizData[currentTopic] || [];
+      box.innerHTML = '';
+      list.forEach(function (q) {
+        var card = document.createElement('div');
+        card.className = 'quiz-card';
+        var q1 = document.createElement('div'); q1.className = 'quiz-question'; q1.textContent = q.question;
+        var opts = document.createElement('div'); opts.className = 'quiz-options';
+        var sol = document.createElement('div'); sol.className = 'solution-box'; sol.innerHTML = '<strong>Çözüm:</strong> ' + q.sol;
+        var done = false;
+        q.options.forEach(function (t, i) {
+          var b = document.createElement('button'); b.className = 'option-btn'; b.textContent = t;
+          b.onclick = function () {
+            if (done) return; done = true;
+            var all = opts.querySelectorAll('.option-btn');
+            all[q.ans].classList.add('correct');
+            if (i !== q.ans) b.classList.add('incorrect');
+            sol.style.display = 'block';
+          };
+          opts.appendChild(b);
+        });
+        card.appendChild(q1); card.appendChild(opts); card.appendChild(sol);
+        box.appendChild(card);
+      });
+      if (!list.length) box.innerHTML = '<p style="color:var(--text-muted)">Bu konu için henüz soru yok.</p>';
+    }
+
+    // --- Atom simülatörü ---
+    function runAtomSimulation() {
+      var el = elementsData[document.getElementById('elementSelect').value];
+      var re = /(\d)([spdf])([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, m, unpaired = 0, last = null, subs = [];
+      while ((m = re.exec(el.config)) !== null) {
+        var occ = 0; m[3].split('').forEach(function (c) { occ = occ * 10 + SUP[c]; });
+        var orbs = ORB[m[2]];
+        unpaired += occ <= orbs ? occ : 2 * orbs - occ;
+        last = { n: +m[1], t: m[2], occ: occ, orbs: orbs }; subs.push(last);
+      }
+      var per = 0; subs.forEach(function (s) { if (s.n > per) per = s.n; });
+      var blk = last.t, grp;
+      if (blk === 'd') { var tot = last.occ; subs.forEach(function (s) { if (s.t === 's' && s.n === per) tot += s.occ; }); grp = tot <= 7 ? tot + 'B' : tot <= 10 ? '8B' : tot === 11 ? '1B' : '2B'; }
+      else { var v = 0; subs.forEach(function (s) { if (s.n === per && (s.t === 's' || s.t === 'p')) v += s.occ; }); grp = el.z === 2 ? '8A' : v + 'A'; }
+      var ml, ms;
+      if (last.occ <= last.orbs) { ml = -LNUM[last.t] + (last.occ - 1); ms = '+1/2'; }
+      else { ml = -LNUM[last.t] + (last.occ - last.orbs - 1); ms = '-1/2'; }
+      var mag = unpaired > 0 ? '<span class="highlight-green">Paramanyetik</span>' : '<span class="highlight-red">Diamanyetik</span>';
+      document.getElementById('atomSimOutput').innerHTML =
+        '<div class="section-card"><h3 class="section-title">' + el.name + ' (Z = ' + el.z + ')</h3>' +
+        '<p><strong>Elektron dizilimi:</strong> <code>' + el.config + '</code></p>' +
+        '<p><strong>Periyot / Grup / Blok:</strong> ' + per + '. periyot, ' + grp + ' grubu, ' + blk + ' bloğu</p>' +
+        '<p><strong>Katmanlara göre:</strong> ' + el.e.join(' - ') + '</p>' +
+        '<p><strong>Çiftlenmemiş e⁻:</strong> ' + unpaired + ' → ' + mag + '</p>' +
+        '<p><strong>Son elektronun kuantum sayıları:</strong> n = ' + last.n + ', l = ' + LNUM[last.t] + ' (' + last.t + '), mₗ = ' + ml + ', mₛ = ' + ms + '</p>' +
+        (el.note ? '<div class="osym-box"><strong>⭐ ÖSYM Notu</strong>' + el.note + '</div>' : '') + '</div>';
+    }
+
+    // --- Gaz simülatörü (R = 0,082) ---
+    function clearGasSim() {
+      ['p', 'v', 'n', 't'].forEach(function (k) { document.getElementById('gas-' + k).value = ''; });
+      document.getElementById('gasSimOutput').innerHTML = '';
+    }
+
+    function runGasSimulation() {
+      var ids = ['p', 'v', 'n', 't'], v = {}, empty = [], bad = false;
+      ids.forEach(function (k) {
+        var s = document.getElementById('gas-' + k).value;
+        if (s === '') empty.push(k); else { v[k] = parseFloat(s); if (!(v[k] > 0)) bad = true; }
+      });
+      var out = document.getElementById('gasSimOutput');
+      if (empty.length !== 1) { out.innerHTML = '<span class="highlight-red">Tam olarak 1 kutuyu boş bırakmalısın.</span>'; return; }
+      if (bad) { out.innerHTML = '<span class="highlight-red">Değerler sıfırdan büyük olmalı.</span>'; return; }
+      var e = empty[0], R = 0.082, R273 = 22.4 / 273, r, label;
+      if (e === 't') { var t1 = v.p * v.v / (v.n * R273); if (Math.abs(t1 / 273 - Math.round(t1 / 273)) < 0.005) R = R273; }
+      else if (v.t % 273 === 0) R = R273;
+      if (e === 'p') { r = v.n * R * v.t / v.v; label = 'P = ' + r.toFixed(3) + ' atm'; }
+      if (e === 'v') { r = v.n * R * v.t / v.p; label = 'V = ' + r.toFixed(3) + ' L'; }
+      if (e === 'n') { r = v.p * v.v / (R * v.t); label = 'n = ' + r.toFixed(3) + ' mol'; }
+      if (e === 't') { r = v.p * v.v / (v.n * R); label = 'T = ' + r.toFixed(2) + ' K (' + (r - 273).toFixed(2) + ' °C)'; }
+      out.innerHTML = '<span class="highlight-green">' + label + '</span><br><small style="color:var(--text-muted)">R = ' + (R === R273 ? '22,4/273 (T, 273 K ve katı)' : '0,082') + ' kullanıldı</small>';
+    }
+
+    // --- Çözelti simülatörü ---
+    function clearSolSim() {
+      ['n', 'kg', 'kk', 'kd'].forEach(function (k) { document.getElementById('sol-' + k).value = ''; });
+      document.getElementById('solSimOutput').innerHTML = '';
+    }
+
+    function runSolSimulation() {
+      var i = parseFloat(document.getElementById('sol-sub').value);
+      var n = parseFloat(document.getElementById('sol-n').value);
+      var kg = parseFloat(document.getElementById('sol-kg').value);
+      var kkS = document.getElementById('sol-kk').value, kdS = document.getElementById('sol-kd').value;
+      var custom = kkS !== '' || kdS !== '';
+      var kk = kkS !== '' ? parseFloat(kkS) : 0.52, kd = kdS !== '' ? parseFloat(kdS) : 1.86;
+      var out = document.getElementById('solSimOutput');
+      if (!(n > 0) || !(kg > 0) || !(kk > 0) || !(kd > 0)) { out.innerHTML = '<span class="highlight-red">Mol sayısı, çözücü kütlesi (kg) ve sabitler sıfırdan büyük olmalı.</span>'; return; }
+      var m = n / kg, mt = m * i, dk = kk * mt, dd = kd * mt;
+      var html = 'Molalite: <strong>' + m.toFixed(3) + ' m</strong> (toplam tanecik: ' + mt.toFixed(3) + ' molal)<br>';
+      html += 'ΔT<sub>k</sub> = <span class="highlight-green">' + dk.toFixed(3) + ' °C</span>' + (custom ? '' : ' → KN = ' + (100 + dk).toFixed(2) + ' °C') + '<br>';
+      html += 'ΔT<sub>d</sub> = <span class="highlight-green">' + dd.toFixed(3) + ' °C</span>' + (custom ? '' : ' → DN = ' + (-dd).toFixed(2) + ' °C');
+      html += '<br><small style="color:var(--text-muted)">K<sub>k</sub> = ' + kk + ', K<sub>d</sub> = ' + kd + ' °C/molal kullanıldı' + (custom ? ' (saf çözücünün KN/DN\'si bilinmediği için yalnızca ΔT verildi)' : '') + '</small>';
+      out.innerHTML = html;
+    }
+
+    // --- Enerji simülatörü ---
+    function parseTerms(s) {
+      var tot = 0, ok = true;
+      s.split(',').forEach(function (p) {
+        p = p.trim(); if (!p) return;
+        var m = p.split('*');
+        var k = m.length > 1 ? parseFloat(m[0]) : 1;
+        var v = parseFloat(m.length > 1 ? m[1] : m[0]);
+        if (isNaN(k) || isNaN(v)) ok = false; else tot += k * v;
+      });
+      return ok ? tot : null;
+    }
+
+    function clearEnerjiSim() {
+      document.getElementById('en-giren').value = '';
+      document.getElementById('en-urun').value = '';
+      document.getElementById('enerjiSimOutput').innerHTML = '';
+    }
+
+    function runEnerjiSim() {
+      var out = document.getElementById('enerjiSimOutput');
+      var g = parseTerms(document.getElementById('en-giren').value);
+      var u = parseTerms(document.getElementById('en-urun').value);
+      if (g === null || u === null || (!document.getElementById('en-giren').value.trim() && !document.getElementById('en-urun').value.trim())) {
+        out.innerHTML = '<span class="highlight-red">Değerleri "katsayı*değer" biçiminde, virgülle ayırarak gir (ör. 2*-393, 1*-286).</span>'; return;
+      }
+      var bond = document.getElementById('en-mode').value === 'bond';
+      var dh = bond ? g - u : u - g;
+      out.innerHTML = 'ΔH = <span class="highlight-green">' + dh.toFixed(2) + ' kJ</span><br>' +
+        (dh < 0 ? 'ΔH &lt; 0 → <strong>ekzotermik</strong> (ısı açığa çıkar)' : dh > 0 ? 'ΔH &gt; 0 → <strong>endotermik</strong> (ısı alınır)' : 'ΔH = 0') +
+        '<br><small style="color:var(--text-muted)">' + (bond ? 'Σkırılan = ' + g.toFixed(2) + ', Σoluşan = ' + u.toFixed(2) : 'Σürün = ' + u.toFixed(2) + ', Σgiren = ' + g.toFixed(2)) + '</small>';
+    }
+
+    // --- Başlangıç ---
+    (function init() {
+      var sel = document.getElementById('elementSelect');
+      elementsData.forEach(function (el, i) {
+        var o = document.createElement('option'); o.value = i; o.textContent = el.z + ' - ' + el.name; sel.appendChild(o);
+      });
+      runAtomSimulation();
+      renderFlashcards();
+      renderQuiz();
+    })();
+  </script>
+</body>
+</html>
