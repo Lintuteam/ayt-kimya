@@ -96,12 +96,50 @@
 
     .highlight-red { color: #f87171; font-weight: bold; }
     .highlight-green { color: #4ade80; font-weight: bold; }
+    /* --- Genel iyileştirmeler --- */
+    html { -webkit-text-size-adjust: 100%; }
+    .sidebar { overflow-y: auto; flex-shrink: 0; }
+    code, td, th, .info-box p, .osym-box { overflow-wrap: anywhere; }
+    .flashcard-front, .flashcard-back { overflow-y: auto; justify-content: flex-start; }
+    .flashcard-front p, .flashcard-back p { margin: auto 0; line-height: 1.45; }
+    .menu-btn { display: none; background: var(--card-bg); color: var(--primary); border: 1px solid var(--card-border); border-radius: 8px; font-size: 1.25rem; line-height: 1; padding: 8px 12px; cursor: pointer; }
+    .menu-overlay { display: none; }
+    .menu-close { display: none; background: transparent; color: var(--text-muted); border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 14px; font-size: 0.9rem; cursor: pointer; align-self: flex-end; margin-bottom: 14px; }
+
+    /* --- TELEFON / DAR EKRAN --- */
+    @media (max-width: 800px) {
+      body { height: 100vh; height: 100dvh; }
+      .menu-btn { display: inline-block; }
+      .menu-close { display: inline-block; }
+      .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 82%; max-width: 300px; z-index: 50; transform: translateX(-100%); transition: transform 0.25s ease; }
+      body.menu-open .sidebar { transform: translateX(0); }
+      body.menu-open .menu-overlay { display: block; position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, 0.6); z-index: 40; }
+      .main-wrapper { width: 100%; height: 100vh; height: 100dvh; }
+      header { padding: 10px 12px; gap: 10px; flex-wrap: wrap; justify-content: flex-start; }
+      header h1 { font-size: 1rem; flex: 1; min-width: 0; }
+      .tabs { width: 100%; flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+      .tab-btn { white-space: nowrap; flex: 0 0 auto; padding: 9px 12px; font-size: 0.8rem; }
+      main { padding: 12px; }
+      .section-card, .sim-panel { padding: 14px; border-radius: 10px; margin-bottom: 14px; }
+      .section-title { font-size: 1.02rem; }
+      .info-grid { grid-template-columns: 1fr !important; gap: 12px; }
+      .info-box { padding: 14px; }
+      .flashcards-container { grid-template-columns: 1fr; gap: 14px; }
+      .flashcard { height: 230px; }
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      th, td { padding: 9px 10px; font-size: 0.8rem; min-width: 96px; }
+      .osym-box { padding: 12px; font-size: 0.86rem; }
+      .quiz-card { padding: 14px; }
+      .option-btn { padding: 12px; }
+      .sim-select, .sim-input { max-width: 100%; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
 
   <!-- SOL MENÜ -->
   <aside class="sidebar">
+    <button class="menu-close" onclick="toggleMenu(false)" aria-label="Menüyü kapat">✕ Kapat</button>
     <div class="sidebar-logo">⚛️ AYT Kimya Pro</div>
     <div class="topic-list">
       <!-- DİKKAT: onClick içindeki 'this' parametresi eklendi, artık geçişler sorunsuz çalışacak -->
@@ -120,13 +158,18 @@
       <button class="topic-btn" onclick="changeTopic('hiz', 'Kimyasal Tepkimelerde Hız', this)">
         <span>5.</span> Kimyasal Tepkimelerde Hız
       </button>
+      <button class="topic-btn" onclick="changeTopic('denge', 'Kimyasal Tepkimelerde Denge', this)">
+        <span>6.</span> Kimyasal Tepkimelerde Denge
+      </button>
     </div>
   </aside>
+  <div class="menu-overlay" onclick="toggleMenu(false)"></div>
 
   <!-- ANA İÇERİK ALANI -->
   <div class="main-wrapper">
     <!-- Üst Sekmeler -->
     <header>
+      <button class="menu-btn" onclick="toggleMenu()" aria-label="Konu menüsü">☰</button>
       <h1 id="headerTitle">Bölüm: <span>Modern Atom Teorisi</span></h1>
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('notes-tab')">📘 Ders Notları</button>
@@ -433,6 +476,22 @@
 <div class="section-card"><h3 class="section-title">⚡ BÖLÜM 6: Tepkime Hızına Etki Eden Faktörler</h3><div class="info-grid"><div class="info-box"><h4>1) Maddenin Cinsi</h4><p>Türlerin iyon veya molekül yapılı olması, kopan/oluşan bağ sayısı, fiziksel hal, metalin aktifliği ve çarpışacak tanecik sayısı hızı değiştirir.<br>• Zıt yüklü iyon tepkimeleri çok hızlı (iyon yükü fazlaysa daha hızlı: Ca²⁺ + S²⁻ &gt; Ag⁺ + Cl⁻), aynı yüklü iyonlarınki orta hızlı, bağ kopması ve oluşması gerektirenler yavaştır. Örn: Ag⁺ + Cl⁻ &gt; 2Fe²⁺ + Mn⁴⁺ &gt; CH₄ + 2O₂.<br>• Kopan ve oluşan bağ sayısı arttıkça hız azalır (CH₄ yanması &gt; C₃H₈ yanması).<br>• İyonik bileşiklerin sulu çözelti tepkimeleri katı–katı tepkimelerden hızlıdır.<br>• Çarpışacak tanecik sayısı arttıkça tepkime yavaşlar (H₂ + Cl₂ → 2HCl &gt; ½N₂ + 3/2H₂ → NH₃).<br>• Aktif metal/ametal tepkimeleri daha hızlıdır (Ca + HCl &gt; Fe + HCl).</p></div><div class="info-box"><h4>2) Derişim</h4><p>Derişim artınca birim hacimdeki etkin çarpışma sayısı artar, hız artar. Başlangıç derişimi verilmemişse 1 M kabul edilir.<br>Örn: Pb²⁺ + 2I⁻ → PbI₂; [Pb²⁺] 2 kat, [I⁻] yarıya: TH₂ = k·2·(1/2)² = k/2 → hız <strong>yarıya düşer</strong>.</p></div><div class="info-box"><h4>3) Temas Yüzeyi</h4><p>Katının toz haline getirilmesi temas yüzeyini artırır; k'nın sayısal değeri ve hız artar (Zn tozu + HCl).</p></div><div class="info-box"><h4>4) Sıcaklık</h4><p>Sıcaklık artınca ortalama kinetik enerji artar, aktifleşme enerjisine ulaşan tanecik sayısı artar, birim zamandaki etkin çarpışma artar, k artar. <strong>E<sub>a</sub> ve mekanizma değişmez.</strong> Endotermik ve ekzotermik tüm tepkimelerin hızı artar; aynı sıcaklık artışı farklı tepkimelerin hızını aynı oranda artırmaz.</p></div><div class="info-box"><h4>5) Katalizör</h4><p>Tepkimeye sonradan katılıp değişmeden çıkan ve hızlandıran maddedir. Tepkime girenlerle aynı fiziksel haldeyse <strong>homojen</strong>, farklıysa <strong>heterojen</strong> katalizördür.<br>• E<sub>a,i</sub> ve E<sub>a,g</sub>'yi aynı oranda azaltır, daha düşük enerjili aktifleşmiş kompleks oluşur.<br>• ΔH, girenlerin ve ürünlerin entalpisi, verim ve tepkimenin yönü <strong>değişmez</strong>.<br>• Etkin çarpışma sayısı ve k artar; mekanizma değişebilir (yavaş basamağa etki eder).<br>• Tepkimeyi başlatmaz, sonlandırmaz; net tepkimeye yazılmaz.<br>• E<sub>a</sub>'nın sayısal değerini değiştiren tek faktördür.</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Molekül sayısı – kinetik enerji grafiğinde E<sub>a</sub> çizgisinin sağında kalan alan, aktifleşme enerjisini aşan tanecikleri gösterir. Sıcaklık artarsa (T₂ &gt; T₁) eğri sağa kayar ve bu alan büyür; katalizör ise <strong>E<sub>a</sub> çizgisini sola</strong> çeker (E<sub>a2</sub> &lt; E<sub>a1</sub>). <strong>Katalizör kullanımı sıcaklığı etkilemez.</strong></div></div>
 <div class="section-card"><h3 class="section-title">⚡ BÖLÜM 7: Çıkmış Konular</h3><p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px">&quot;-&quot; o yıl bu konudan soru çıkmadığını gösterir. * işaretli satır soru dökümünden alındı, ÖSYM kitapçığından teyit et. Konusu yazılmayan yılda soru çıkmış ama başlığına ulaşamadım.</p><table><thead><tr><th>Yıl</th><th>Konu</th></tr></thead><tbody><tr><td>2018</td><td>Deneysel veriler yorumu</td></tr><tr><td>2019</td><td>Ortalama hız hesaplaması</td></tr><tr><td>2020</td><td>Hız eşitliği ifadesi</td></tr><tr><td>2021</td><td>Deneysel veriler yorumu</td></tr><tr><td>2022</td><td>P.E – T.K grafiği yorum sorusu</td></tr><tr><td>2023</td><td>Molekül sayısı – K.E grafiği yorumu</td></tr><tr><td>2024</td><td>Tek basamaklı tepkimenin TH bağıntısını yazıp, bu bağıntının yorumu</td></tr><tr><td>2025</td><td>Deneysel derişim–hız verilerinden hız bağıntısı yazma*</td></tr><tr><td>2026</td><td>1 soru (konu başlığı bulunamadı)</td></tr></tbody></table></div>
         </div>
+
+        <div id="notes-denge" class="topic-notes">
+<div class="section-card"><h3 class="section-title">⚖️ BÖLÜM 1: Dinamik Denge ve İki Eğilim</h3><div class="info-grid"><div class="info-box"><h4>Dinamik Denge</h4><p>Birbirinin tersi olan iki olayın zıt yönlerde, eşit zaman aralığında ve <strong>aynı hızda</strong> gerçekleşmesidir.</p></div><div class="info-box"><h4>Fiziksel Dinamik Denge</h4><p>Kapalı kapta su ısıtılınca önce buharlaşma hızlıdır, sonra yoğunlaşma başlar ve hızı artar.<br>H₂O(s) + ısı ⇌ H₂O(g)<br>Buharlaşma hızı = yoğunlaşma hızı olunca denge kurulur.</p></div><div class="info-box"><h4>İki Eğilim</h4><p>Denge tepkimelerinde iki eğilim vardır: <strong>maksimum düzensizlik</strong> ve <strong>minimum enerjili olma</strong>. Genellikle bu iki eğilim denge tepkimelerinde <strong>ters yöndedir</strong>.</p></div></div><table><thead><tr><th>Tepkime</th><th>Maks. düzensizlik</th><th>Min. enerji</th></tr></thead><tbody><tr><td>H₂O(k) + ısı ⇌ H₂O(s)</td><td>İleri (→)</td><td>Geri (←)</td></tr><tr><td>N₂(g) + 3H₂(g) ⇌ 2NH₃(g) + ısı (4 mol gaz → 2 mol gaz)</td><td>Geri (←)</td><td>İleri (→)</td></tr><tr><td>CH₄(g) + 2O₂(g) ⇌ CO₂(g) + 2H₂O(s) + ısı (3 mol gaz → 1 mol gaz)</td><td>Geri (←)</td><td>İleri (→)</td></tr><tr><td>NH₃(suda) + H₂O(s) ⇌ NH₄⁺(suda) + OH⁻(suda) + ısı</td><td>İleri (→)</td><td>İleri (→) <strong>(aynı yön)</strong></td></tr></tbody></table><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>İki eğilimin <strong>aynı yönde</strong> olduğu denge tepkimeleri de vardır (son satır).</div></div>
+<div class="section-card"><h3 class="section-title">⚖️ BÖLÜM 2: Kimyasal Denge ve Kurulma Şartları</h3><div class="info-grid"><div class="info-box"><h4>Kimyasal Dinamik Denge</h4><p>2NO₂(g) ⇌ N₂O₄(g) (kahverengi / renksiz)<br>Denge kurulunca <strong>TH<sub>i</sub> = TH<sub>g</sub></strong> olur.</p></div><div class="info-box"><h4>Dengenin Kurulma Şartları</h4><p>• Sıcaklık sabit<br>• Tersinir olaylar gerçekleşiyor<br>• Tepkimedeki bütün maddeler kapta; gaz varsa kap kapalı (sulu çözeltilerde kap kapalı olmak zorunda değil)<br>• Mikro olaylar devam eder, makro olaylar durur<br>• Maddelerin derişimi sabit<br>• Tepkime ⇌ oku ile gösterilir</p></div><div class="info-box"><h4>Homojen ve Heterojen Denge</h4><p><strong>Homojen:</strong> bütün maddeler aynı fiziksel halde. CO(g) + Cl₂(g) ⇌ COCl₂(g)<br><strong>Heterojen:</strong> en az bir madde farklı fiziksel halde. CaCO₃(k) ⇌ CaO(k) + CO₂(g)</p></div></div><table><thead><tr><th>Denge durumunu belirleme</th><th>Dengeye ulaşıldığını gösteren</th></tr></thead><tbody><tr><td>Basınç veya hacim değişimi (sabit sıcaklıkta)</td><td>Basınç/hacim sabitlenir (N₂ + 3H₂ ⇌ 2NH₃)</td></tr><tr><td>Renk değişimi</td><td>Renk sabitlenir (N₂O₄ ⇌ 2NO₂)</td></tr><tr><td>Elektrik iletkenliği</td><td>İletkenlik sabitlenir (Mg²⁺ + 2F⁻ ⇌ MgF₂(k))</td></tr><tr><td>pH değişimi</td><td>pH sabitlenir</td></tr><tr><td>Çökelek oluşumu</td><td>Çökelek miktarı sabitlenir</td></tr></tbody></table><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Hız–zaman grafiğinde ileri hız azalır, geri hız artar, denge anında eşitlenir. Derişim–zaman grafiğinde denge anında derişimler <strong>sabittir ama birbirine eşit olmak zorunda değildir</strong>.</div></div>
+<div class="section-card"><h3 class="section-title">⚖️ BÖLÜM 3: Denge Sabiti (K<sub>c</sub> ve K<sub>p</sub>)</h3><div class="info-grid"><div class="info-box"><h4>Kc Nasıl Bulunur?</h4><p>N₂ + 3H₂ ⇌ 2NH₃ için denge anında TH<sub>i</sub> = TH<sub>g</sub> → k<sub>i</sub>[N₂][H₂]³ = k<sub>g</sub>[NH₃]²<br><code style="color:var(--primary)">K<sub>c</sub> = k<sub>i</sub>/k<sub>g</sub> = [NH₃]² / ([N₂][H₂]³)</code><br>Kısaca K<sub>c</sub> = [ürünler] / [girenler] (katsayılar üs olur).</p></div><div class="info-box"><h4>Denge Bağıntısına Ne Yazılır?</h4><p>Yalnızca <strong>gaz (g) ve sulu çözelti (aq)</strong> maddeler yazılır; katı ve saf sıvılar yazılmaz. Mekanizmalı tepkimelerde denge bağıntısı <strong>net tepkimeye</strong> göre yazılır.</p></div><div class="info-box"><h4>K<sub>c</sub> Hakkında</h4><p>Sayısal değeri <strong>yalnızca sıcaklıkla</strong> değişir. Birimsiz ifade edilir.</p></div><div class="info-box"><h4>K<sub>p</sub> ve K<sub>c</sub></h4><p><code style="color:var(--primary)">K<sub>p</sub> = K<sub>c</sub>(RT)<sup>Δn</sup></code> (Δn = gaz ürün mol − gaz giren mol)<br>CO₂ + NO ⇌ NO₂ + CO: Δn = 0 → K<sub>p</sub> = K<sub>c</sub><br>N₂ + 3H₂ ⇌ 2NH₃: Δn = −2 → K<sub>p</sub> = K<sub>c</sub>/(RT)², K<sub>c</sub> = K<sub>p</sub>(RT)²</p></div></div><table><thead><tr><th>Tepkime üzerinde işlem</th><th>Denge sabiti</th></tr></thead><tbody><tr><td>Tepkime ters çevrilirse</td><td>1/K<sub>c</sub> olur</td></tr><tr><td>Tepkime n ile çarpılırsa</td><td>(K<sub>c</sub>)<sup>n</sup> olur (çarpan üs yazılır)</td></tr><tr><td>İki tepkime toplanırsa</td><td>K<sub>c1</sub> × K<sub>c2</sub> olur</td></tr></tbody></table></div>
+<div class="section-card"><h3 class="section-title">⚖️ BÖLÜM 4: Denge Hesaplamaları ve Denge Kesri (Q<sub>c</sub>)</h3><div class="info-grid"><div class="info-box"><h4>Çözüm Yolu</h4><p>1) Başlangıç – değişim – denge tablosu kur.<br>2) Derişim = mol / hacim. Katı ve saf sıvıları yazma.<br>3) Denge derişimlerini K<sub>c</sub> bağıntısında yerine koy (K<sub>p</sub> için kısmi basınçlar).<br>4) Gaz mol sayıları eşitse (Δn = 0) hacim sadeleşir.</p></div><div class="info-box"><h4>Denge Kesri (Q<sub>c</sub>)</h4><p>Herhangi bir anda derişimlerin denge bağıntısında yerine konmasıyla bulunan değerdir. Sistemin dengede olup olmadığını gösterir.</p></div></div><table><thead><tr><th>Karşılaştırma</th><th>Anlamı</th></tr></thead><tbody><tr><td>Q<sub>c</sub> = K<sub>c</sub></td><td>Sistem dengede</td></tr><tr><td>Q<sub>c</sub> &gt; K<sub>c</sub></td><td>Ortamda ürün çok; dengeye ulaşmak için <strong>girenlere</strong> kayar</td></tr><tr><td>Q<sub>c</sub> &lt; K<sub>c</sub></td><td>Ortamda giren çok; dengeye ulaşmak için <strong>ürünlere</strong> kayar</td></tr></tbody></table></div>
+<div class="section-card"><h3 class="section-title">⚖️ BÖLÜM 5: Dengeye Etki Eden Faktörler</h3><table><thead><tr><th>Faktör</th><th>Etki</th></tr></thead><tbody><tr><td>Derişim</td><td>Eklenen maddenin olmadığı tarafa, çekilen maddenin olduğu tarafa kayar. Kc değişmez. Grafikte yalnızca <strong>tek bir maddenin eğrisi</strong> ani artar/azalır.</td></tr><tr><td>Hacim</td><td>Gaz mol sayısı eşit değilse etkiler. V artarsa P azalır, denge gaz mol sayısı çok olan tarafa; V azalırsa gaz mol sayısı az olan tarafa kayar. Kc değişmez.</td></tr><tr><td>Basınç</td><td>Basıncı artan maddenin (veya toplam basıncın) azalması için gaz mol sayısı az olan / maddenin olmadığı tarafa kayar.</td></tr><tr><td>Sıcaklık</td><td>Sıcaklığı madde gibi düşün. <strong>Kc’yi değiştiren tek faktördür.</strong></td></tr><tr><td>Katalizör</td><td>Dengeye daha hızlı ulaşılmasını sağlar, k<sub>i</sub> ve k<sub>g</sub> aynı oranda artar; Kc ve denge değişmez.</td></tr></tbody></table><div class="info-grid"><div class="info-box"><h4>Derişim Örnekleri</h4><p>3X(g) + Y(g) ⇌ Z(k) + 2T(g)<br>• <strong>Y eklenirse:</strong> ürünlere kayar; X azalır, T artar, Z katısı artar, Y anlık artıp sonra azalır, toplam mol artar.<br>• <strong>T eklenirse:</strong> girenlere kayar; X ve Y artar, T anlık artıp sonra azalır, toplam mol artar.<br>• <strong>X çekilirse:</strong> girenlere kayar; T azalır, Y artar, X anlık azalıp sonra biraz artar, toplam mol azalır.</p></div><div class="info-box"><h4>Hacim Notları</h4><p>• N₂ + 3H₂ ⇌ 2NH₃: V artarsa tüm derişimler azalır, denge girenlere kayar (NH₃ daha çok azalır). V azalırsa tüm derişimler artar, denge ürünlere kayar.<br>• Bütün gazların derişimi <strong>ani</strong> artmış/azalmışsa kap hacmi değiştirilmiştir.<br>• Gaz mol sayıları eşitse (CO₂ + H₂ ⇌ H₂O + CO) hacim değişimi dengeyi etkilemez.<br>• Heterojen dengede yalnızca gaz maddelerin mol sayısına bakılır.<br>• Sulu çözelti dengelerinde su eklemek/buharlaştırmak hacmi değiştirir; molarite düşünülür. Örn: 2Cu⁺ + Fe(k) ⇌ Fe²⁺ + 2Cu(k), su eklenirse denge girenlere kayar (iyon sayısı fazla taraf).</p></div><div class="info-box"><h4>İnert Gaz (Ne) Ekleme</h4><p><strong>Sabit hacimli kapta:</strong> toplam basınç artar ama kısmi basınçlar değişmez, denge bozulmaz.<br><strong>Sabit basınçlı (pistonlu) kapta:</strong> hacim artar, kısmi basınçlar azalır, denge gaz mol sayısı çok olan tarafa kayar.</p></div><div class="info-box"><h4>Tek Madde Cinsinden Denge</h4><p>CaCO₃(k) ⇌ CaO(k) + CO₂(g): K<sub>c</sub> = [CO₂]. Sıcaklık değişmedikçe [CO₂] değişmez. V artarsa [CO₂] önce düşer, denge ürünlere kayar ve [CO₂] eski değerine döner.</p></div><div class="info-box"><h4>Sıcaklık Detayı</h4><p>Sıcaklık artarsa her iki yönde hız ve hız sabiti artar.<br><strong>Endotermik</strong> (CaCO₃ + ısı ⇌ CaO + CO₂): ileri hız daha çok artar (k<sub>i</sub> daha çok), denge ürünlere kayar, <strong>Kc artar</strong>.<br><strong>Ekzotermik</strong> (2SO₂ + O₂ ⇌ 2SO₃ + ısı): geri hız daha çok artar (k<sub>g</sub> daha çok), denge girenlere kayar, <strong>Kc azalır</strong>.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">💧 BÖLÜM 6: Çözünme – Çökelme Dengeleri</h3><div class="info-grid"><div class="info-box"><h4>Çözünürlük</h4><p><strong>Çözünürlük:</strong> doygun çözeltide çözünen maddenin mol sayısı. <strong>Molar çözünürlük (S):</strong> 1 L doygun çözeltide çözünen maddenin mol sayısı.<br>Çok çözünen iyonlar: Li⁺, Na⁺, K⁺, NH₄⁺, NO₃⁻.</p></div><div class="info-box"><h4>Çözünürlük Dengesi</h4><p>Suda az çözünen iyonik katının doygun çözeltisinde iyonlar ile dipteki katı arasında kurulan <strong>heterojen</strong> dengedir. Çözünme hızı = çökelme hızı, iyon derişimleri ve sıcaklık sabittir.<br>PbI₂(k) ⇌ Pb²⁺ + 2I⁻ → <code style="color:var(--primary)">K<sub>çç</sub> = [Pb²⁺][I⁻]²</code></p></div><div class="info-box"><h4>K<sub>çç</sub> Hakkında</h4><p>Belirli bir birimi yoktur, değerler yerine konup hesaplanır. Sayısal değeri yalnızca sıcaklıkla değişir. İyonik katılar endotermik veya ekzotermik çözünebilir. Aynı tür (aynı iyon sayılı) bileşiklerde K<sub>çç</sub> küçüldükçe çözünürlük azalır.</p></div></div><table><thead><tr><th>Bileşik</th><th>Denge</th><th>K<sub>çç</sub> – S bağıntısı</th></tr></thead><tbody><tr><td>BaSO₄</td><td>Ba²⁺ + SO₄²⁻</td><td>S²</td></tr><tr><td>PbI₂</td><td>Pb²⁺ + 2I⁻</td><td>S·(2S)² = 4S³</td></tr><tr><td>Fe(OH)₃</td><td>Fe³⁺ + 3OH⁻</td><td>S·(3S)³ = 27S⁴</td></tr><tr><td>X₂Y₃</td><td>2X³⁺ + 3Y²⁻</td><td>(2S)²(3S)³ = 108S⁵</td></tr></tbody></table><div class="info-grid"><div class="info-box"><h4>Sıcaklığın Etkisi</h4><p><strong>Endotermik</strong> (AgCl + ısı ⇌ Ag⁺ + Cl⁻): T artarsa denge ürünlere kayar, çözünme hızı çökelme hızından daha çok artar, iyon derişimleri ve <strong>K<sub>çç</sub> artar</strong>, dipteki katı azalır, özkütle ve iletkenlik artar. T azalırsa tersi.<br><strong>Ekzotermik</strong> (CeSO₄ ⇌ Ce²⁺ + SO₄²⁻ + ısı): T artarsa çökelme hızı daha çok artar, denge girenlere kayar, dipteki katı artar, iyon derişimi, <strong>K<sub>çç</sub></strong>, özkütle ve iletkenlik azalır. T azalırsa tersi.</p></div><div class="info-box"><h4>Ortak İyon Etkisi</h4><p><strong>Ortak iyon çözünürlüğü azaltır.</strong> Ortak iyonun molaritesi ne kadar büyükse çözünürlük o kadar azalır. Az çözünen katılar denge tepkimesine göre çözündüğü için ortak iyon etkisi denge olarak düşünülür.<br>Doygun AgCl çözeltisine NaCl katısı atılırsa: [Cl⁻] artar, denge girenlere kayar, AgCl katısı artar, çözünme azalır; yeniden dengede [Cl⁻] toplamda artar, [Ag⁺] azalır, <strong>K<sub>çç</sub> değişmez</strong>, AgCl’nin çözünürlüğü azalır.</p></div><div class="info-box"><h4>Hesap Örnekleri</h4><p>CuS (K<sub>çç</sub> = 4·10⁻⁸): saf suda x² = 4·10⁻⁸ → x = 2·10⁻⁴ M. 0,1 M Cu(NO₃)₂ içinde: 0,1·x = 4·10⁻⁸ → x = 4·10⁻⁷ M.<br>Ortak iyonlu ortamda önce toplam iyon derişimi yerine koyulur: K<sub>çç</sub> = [X⁺][Cl⁻] = (S)(0,3).</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 7: Oksitler ve Asit – Baz Tepkimeleri</h3><div class="info-grid"><div class="info-box"><h4>Oksit</h4><p>Elementlerin O²⁻ ile yaptığı bileşiklerdir; bileşikte O²⁻ ve <strong>tek anyon</strong> olmalıdır. Na₂O, SO₂, CO, NO oksittir; MgCO₃ oksit değildir (CO₃²⁻ var).</p></div><div class="info-box"><h4>Metal Oksitler</h4><p>Çoğu bazik. CaO + H₂O → Ca(OH)₂ → Ca²⁺ + 2OH⁻<br>Periyotta soldan sağa bazlık kuvveti <strong>azalır</strong>, grupta aşağı <strong>artar</strong>.</p></div><div class="info-box"><h4>Amfoter Metaller ve Oksitleri</h4><p>Amfoter metaller: <strong>Be, Al, Zn, Cr, Pb, Sn</strong>. Oksitleri de amfoterdir (suda az çözünür): Al₂O₃, SnO, ZnO, PbO, PbO₂. Asitlere karşı baz, bazlara karşı asit gibi davranırlar.</p></div><div class="info-box"><h4>Ametal Oksitler</h4><p>O sayısı &gt; A (ametal) sayısı: <strong>asidik</strong> (CO₂, SO₂, SO₃, N₂O₅, N₂O₄). O ≤ A: <strong>nötr</strong> (NO, CO, N₂O). Nötr oksitler asit/bazla tepkime vermez. Asitlik kuvveti periyotta soldan sağa artar, grupta aşağı azalır.</p></div><div class="info-box"><h4>Bileşik Oksitler</h4><p>Bir elementin almaması gereken değerliği almış gibi görünen yapı, iki oksidin toplamıdır: Pb₂O₃ = PbO + PbO₂, Sn₂O₃ = SnO + SnO₂, Fe₃O₄ (+8/3) = FeO + Fe₂O₃.<br>Değişken değerlikler: Pb (+2, +4), Sn (+2, +4), Fe (+2, +3), Hg (+1, +2), Cu (+1, +2).</p></div><div class="info-box"><h4>Gazların Suda Çözünmesi</h4><p>CO₂ ve NH₃’ün suda çözünmesi <strong>kimyasal</strong> olaydır (asit/baz oluşur): CO₂ + H₂O → H₂CO₃ ⇌ H⁺ + HCO₃⁻; NH₃ + H₂O → NH₄OH ⇌ NH₄⁺ + OH⁻. O₂’nin suda çözünmesi <strong>fiziksel</strong> olaydır.</p></div></div><table><thead><tr><th>Tepkime</th><th>Sonuç</th></tr></thead><tbody><tr><td>Asit + baz → tuz + su</td><td>KA + KB → nötr tuz; KA + ZB → asidik tuz; ZA + KB → bazik tuz</td></tr><tr><td>Aktif metal + asit → tuz + H₂</td><td>Na + HF → NaF + ½H₂; Al + 3HCl → AlCl₃ + 3/2 H₂</td></tr><tr><td>Yarı soy metal (Cu, Hg, Ag) + O’lu asit</td><td>Seyreltik H₂SO₄: tepkime yok. Derişik H₂SO₄: tuz + su + SO₂. Seyreltik HNO₃: tuz + su + NO. Derişik HNO₃: tuz + su + NO₂</td></tr><tr><td>Asit + CO₃²⁻ (veya HCO₃⁻) içeren tuz</td><td>CO₂ gazı açığa çıkar: 2HCl + CaCO₃ → CaCl₂ + CO₂ + H₂O</td></tr><tr><td>Au, Pt</td><td>Hiçbir asit ve bazla tepkime vermez; yalnızca kral suyu (3HCl + HNO₃) ile tepkime verir (NO çıkar)</td></tr><tr><td>Kuvvetli baz + amfoter metal → H₂</td><td>Zn + 2NaOH → Na₂ZnO₂ + H₂; Al + 3KOH → K₃AlO₃ + 3/2 H₂ (bilinmeli)</td></tr></tbody></table><div class="info-grid"><div class="info-box"><h4>Asit-Baz mı, Nötrleşme mi?</h4><p>HCl(g) + NH₃(g) → NH₄Cl(k): asit–baz tepkimesi.<br>HCl(suda) + NH₃(suda) → NH₄Cl(suda): asit–baz <strong>ve nötrleşme</strong> tepkimesi (sulu çözeltiler).</p></div><div class="info-box"><h4>Güvenlik ve Özel Durumlar</h4><p>• Asit çözeltisi hazırlarken ısı açığa çıkar; <strong>önce su, sonra yavaş yavaş asit</strong> eklenir.<br>• Nem çekici (higroskopik): H₂SO₄, H₃PO₄, CH₃COOH, NaOH, Na₂CO₃; cilde değerse bol suyla yıkanır.<br>• Cam ve porselene etki eden tek asit <strong>HF</strong>’dir: SiO₂ + 4HF → SiF₄ + 2H₂O. HF dışındaki asitler cam şişede saklanır.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 8: Suyun Otoiyonizasyonu ve pH</h3><div class="info-grid"><div class="info-box"><h4>Otoiyonizasyon</h4><p>Suyun kendi kendine iyonlarına ayrışmasıdır. Su polardır, çok az iyonludur ve çok az elektrik iletir.<br>H₂O + H₂O ⇌ H₃O⁺ + OH⁻ veya ısı + H₂O ⇌ H⁺ + OH⁻ (<strong>endotermik</strong>)</p></div><div class="info-box"><h4>K<sub>su</sub></h4><p><code style="color:var(--primary)">K<sub>su</sub> = [H⁺][OH⁻]</code> (giren sıvı olduğu için yazılmaz)<br>25°C’de K<sub>su</sub> = 10⁻¹⁴, saf suda [H⁺] = [OH⁻] = 10⁻⁷ M.<br>K<sub>su</sub>’yu değiştiren tek faktör <strong>sıcaklıktır</strong>: sıcaklık artarsa denge ürünlere kayar, [H⁺] ve [OH⁻] ve K<sub>su</sub> artar.</p></div><div class="info-box"><h4>pH – pOH</h4><p><code style="color:var(--primary)">pH = −log[H⁺]</code>, <code style="color:var(--primary)">pOH = −log[OH⁻]</code><br>pK<sub>su</sub> = 14 → <code style="color:var(--primary)">pH + pOH = 14</code> (25°C)</p></div></div><table><thead><tr><th>25°C’de koşul</th><th>Çözelti</th></tr></thead><tbody><tr><td>[H⁺] = [OH⁻] = 10⁻⁷ M, pH = pOH = 7</td><td>Nötr</td></tr><tr><td>[H⁺] &gt; [OH⁻], pH &lt; pOH</td><td>Asidik</td></tr><tr><td>[H⁺] &lt; [OH⁻], pH &gt; pOH</td><td>Bazik</td></tr></tbody></table><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Saf su, sıcaklık artınca da nötr kalır ([H⁺] = [OH⁻]) ama pH 7’den küçük olur. “pH = 7 ⇒ nötr” kuralı yalnızca 25°C için geçerlidir.</div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 9: Asit – Baz Tanımları ve Kuvvet</h3><div class="info-grid"><div class="info-box"><h4>Arrhenius</h4><p>Suda çözününce H⁺ derişimini artıran madde <strong>asit</strong>, OH⁻ derişimini artıran madde <strong>baz</strong>dır.</p></div><div class="info-box"><h4>Brønsted–Lowry</h4><p>Proton (H⁺) verebilen madde <strong>asit</strong>, proton alabilen madde <strong>baz</strong>dır.<br>HCN + H₂O ⇌ CN⁻ + H₃O⁺: HCN asit, H₂O baz, CN⁻ baz, H₃O⁺ asit.<br>Konjuge çiftler: HCN–CN⁻ ve H₂O–H₃O⁺. Çift arasında bir H⁺ fark vardır; girende asit olanın konjugesi üründe bazdır.</p></div><div class="info-box"><h4>Konjuge Çiftte K<sub>a</sub> · K<sub>b</sub></h4><p><code style="color:var(--primary)">K<sub>a</sub> × K<sub>b</sub> = K<sub>su</sub> = 10⁻¹⁴</code> (25°C)<br>Örn: H₂PO₄⁻ (asit, K<sub>a</sub>) – HPO₄²⁻ (baz, K<sub>b</sub>) çifti.</p></div><div class="info-box"><h4>Kuvvetli ve Zayıf</h4><p>%100 iyonlaşanlar <strong>kuvvetli</strong> (tek yönlü okla), iyonlaşmayanlar <strong>zayıf</strong> (denge oku, K<sub>a</sub>/K<sub>b</sub>) gösterilir.<br><strong>Kuvvetli asitler:</strong> HCl, HNO₃, H₂SO₄, HClO₄, HI, HBr<br><strong>Zayıf asitler:</strong> HF, H₂CO₃, HCN, H₃PO₄, CH₃COOH, HCOOH</p></div></div><table><thead><tr><th>Asit grubu</th><th>Kuvvet sıralaması</th><th>Neden?</th></tr></thead><tbody><tr><td>HX (halojen asitleri)</td><td>HI &gt; HBr &gt; HCl &gt; HF</td><td>Grupta aşağı inildikçe iyon yarıçapı ve bağ uzunluğu artar, bağ kolay kopar. Elektronegatiflik F &gt; Cl &gt; Br &gt; I olduğundan HF’de bağ elektronları güçlü çekilir, H⁺ zor kopar.</td></tr><tr><td>HXOₙ (oksijenli asitler)</td><td>HClO₄ &gt; HClO₃ &gt; HClO₂ &gt; HClO</td><td>Oksijen sayısı arttıkça asitlik kuvveti artar.</td></tr><tr><td>Organik asitler</td><td>HCOOH &gt; CH₃COOH</td><td>C sayısı arttıkça asitlik kuvveti azalır.</td></tr></tbody></table><div class="info-grid"><div class="info-box"><h4>Asidik Özellikli Katyonlar</h4><p>Yükü büyük, çapı küçük Cu²⁺, Fe³⁺, Cr³⁺ gibi katyonlar asidik özellik gösterir: Cu²⁺ + 4H₂O ⇌ Cu(OH)₂ + 2H₃O⁺ (Cu²⁺ asit).</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 10: pH Hesapları</h3><div class="info-grid"><div class="info-box"><h4>Kuvvetli Asit / Baz</h4><p>%100 iyonlaşır; çözelti derişiminden [H⁺] veya [OH⁻] bulunur, sonra pH/pOH hesaplanır.<br>Gerekli bağıntılar: <code style="color:var(--primary)">M = %c·d·10 / Ma</code> ve <code style="color:var(--primary)">M₁V₁ = M₂V₂</code><br>Örn: 0,005 M Ba(OH)₂ → [OH⁻] = 0,01 M, pOH = 2, pH = 12.</p></div><div class="info-box"><h4>Zayıf Asit / Baz</h4><p>Denge tepkimesi hesabı gibi yapılır. HF ⇌ H⁺ + F⁻: başlangıç 1 M; değişim −x, +x, +x; denge (1−x), x, x. x çok küçük olduğu için <strong>1 − x ≈ 1</strong> alınır:<br><code style="color:var(--primary)">K<sub>a</sub> = x² / C</code> → <code style="color:var(--primary)">[H⁺] = √(K<sub>a</sub>·C)</code>. Zayıf baz için [OH⁻] = √(K<sub>b</sub>·C).<br>K<sub>a</sub>, K<sub>b</sub> yalnızca sıcaklıkla değişir; dengeye etki eden her faktör burada da etkilidir. Soru K<sub>a</sub>, K<sub>b</sub>, pH, pOH veya yüzde iyonlaşma sorar.</p></div><div class="info-box"><h4>Molarite – pH Uyumu</h4><p>25°C’de 0,1 M çözeltilerde: pH = 1 → kuvvetli asit; pH = 4 → zayıf asit; pOH = 1 → kuvvetli baz; pOH = 5 → zayıf baz. Molarite ile pH/pOH uyumluysa kuvvetlidir.</p></div></div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 11: Nötrleşme Tepkimeleri</h3><div class="info-grid"><div class="info-box"><h4>Nötrleşme</h4><p>Asit ve bazların <strong>sulu çözeltilerinin</strong> tepkimesidir. Net iyon denklemi: H⁺ + OH⁻ → H₂O(s). Nötrleşme tepkimeleri <strong>ekzotermiktir</strong>.</p></div><div class="info-box"><h4>Tam Nötrleşme</h4><p>Asit ve bazın artansız tepkimeye girmesidir (n<sub>H⁺</sub> = n<sub>OH⁻</sub>).<br>KA + KB → nötr tuz, pH = 7<br>KA + ZB → asidik tuz, pH &lt; 7<br>ZA + KB → bazik tuz, pH &gt; 7<br>Tam nötrleşmede pH 7 olmayabilir. Artan olmadığından ortamın pH’ını <strong>tuz</strong> belirler.</p></div><div class="info-box"><h4>Kısmi Nötrleşme</h4><p>H⁺ veya OH⁻’dan birinin <strong>artmasıyla</strong> gerçekleşir.<br>• <strong>KA − KB:</strong> artan asit ise [H⁺] = n<sub>artan</sub>/V<sub>T</sub>; artan baz ise [OH⁻] = n<sub>artan</sub>/V<sub>T</sub>. Tuz nötrdür, pH’a etki etmez. Hızlı formül: [H⁺]·V<sub>T</sub> = M<sub>a</sub>V<sub>a</sub> − M<sub>b</sub>V<sub>b</sub><br>• <strong>KA − ZB:</strong> artan asit (kuvvetli madde) ise ortamın pH’ını asit belirler, asidik tuz etkilemez.<br>• Artan <strong>zayıf baz</strong> ise ortamda nötr olmayan tuz da vardır, pH hesabı <strong>tampon çözeltiler</strong> konusuna girer (tampon pH hesabı kazanımlarda yoktur).</p></div></div><div class="osym-box"><strong>⭐ ÖSYM NOTU:</strong>Soruda “ortamın pH’ı” sorulursa artan maddeye (veya artan yoksa tuza) bakılır; “tuzun pH’ı” sorulursa tuz değerlendirilir.</div></div>
+<div class="section-card"><h3 class="section-title">🧪 BÖLÜM 12: Tampon Çözeltiler ve Hidroliz</h3><div class="info-grid"><div class="info-box"><h4>Tampon Çözelti</h4><p><strong>Zayıf eşlenik asit–baz çiftini</strong> içeren çözeltidir: zayıf asit + o asidin nötr olmayan tuzu veya zayıf baz + o bazın nötr olmayan tuzu bir arada.<br>• <strong>Asidik tampon:</strong> zayıf asit + eşlenik bazı (anyon) içeren tuz. Örn: HF–NaF, CH₃COOH–CH₃COONa, H₂CO₃–NaHCO₃, HCN–KCN<br>• <strong>Bazik tampon:</strong> zayıf baz + eşlenik asidi (katyon) içeren tuz. Örn: NH₃–NH₄Br</p></div><div class="info-box"><h4>Tamponun Özellikleri</h4><p>Az miktarda asit veya baz eklenmesi pH’ı <strong>önemli ölçüde değiştirmez</strong>. Aynı sıcaklıkta su eklenmesi pH’ı değiştirmez. Deniz, okyanus, kan ve canlı organizmalardaki ortamlar tampondur.</p></div><div class="info-box"><h4>Hidroliz</h4><p>Tam nötrleşme sonunda ortamda nötr olmayan tuz varsa, tuzun <strong>zayıf iyonu</strong> (başlangıçtaki zayıf asit/bazdan gelen iyon) su ile denge tepkimesi verir; buna hidroliz denir. <strong>Nötr tuzlar hidroliz olmaz.</strong><br>NH₄Cl → NH₄⁺ + Cl⁻; NH₄⁺ + H₂O ⇌ NH₃ + H₃O⁺, K<sub>h</sub> = [NH₃][H₃O⁺]/[NH₄⁺]</p></div><div class="info-box"><h4>Hidroliz Denklemi Yazmanın Pratik Yolu</h4><p>Ürünlere başlangıçtaki <strong>zayıf asit veya bazı</strong> yaz; yanına tuz asidikse H₃O⁺, tuz bazikse OH⁻ yaz.<br>NaF (bazik tuz): F⁻ + H₂O ⇌ HF + OH⁻</p></div></div></div>
+<div class="section-card"><h3 class="section-title">⚖️ BÖLÜM 13: Çıkmış Konular</h3><p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px">Ünitenin tamamı (denge, asit–baz, çözünürlük dengesi). “-” o yıl soru çıkmadığını gösterir. * işaretli satırlar soru dağılım tablolarından alındı, konu başlığı doğrulanmadı; konusu yazılmayan yılda soru çıkmış ama başlığına ulaşamadım.</p><table><thead><tr><th>Yıl</th><th>Konu</th></tr></thead><tbody><tr><td>2018</td><td>Asit–baz dengesi (1 soru)*</td></tr><tr><td>2019</td><td>Asit–baz dengesi (2 soru)*</td></tr><tr><td>2020</td><td>Grafik ve dengeye etki eden faktörlerin yorumu; asit–baz dengesi (1 soru)*</td></tr><tr><td>2021</td><td>İdeal pistonlu kapta gerçekleşen denge ile ilgili yorum (dengeye etki eden faktörler); asit–baz dengesi (1 soru)*</td></tr><tr><td>2022</td><td>Denge sabiti ilişkisi; çözünürlük dengesi (1 soru)*</td></tr><tr><td>2023</td><td>Denge tepkimelerinde hacim değişimi ile dengenin bulunması</td></tr><tr><td>2024</td><td>Denge hesaplamaları ve denge anı ile ilgili soru</td></tr><tr><td>2025</td><td>2 soru (konu başlığı bulunamadı)</td></tr><tr><td>2026</td><td>2 soru (konu başlığı bulunamadı)</td></tr></tbody></table></div>
+        </div>
       </div>
 
       <!-- TAB 2: SİMÜLATÖR -->
@@ -511,6 +570,26 @@
             <button class="sim-btn" style="background:#ef4444;" onclick="clearHizSim()">Temizle</button>
           </div>
           <div id="hizSimOutput" style="margin-top: 20px; font-size:1.05rem; line-height:1.7;"></div>
+        </div>
+
+        <!-- Denge / Asit-Baz Simülatörü -->
+        <div id="sim-denge" class="topic-sim sim-panel">
+          <h3 style="color: var(--primary); margin-bottom: 15px;">pH ve Çözünürlük Hesaplayıcı (25°C)</h3>
+          <p style="margin-bottom: 20px; font-size:0.9rem; color:var(--text-muted);">Hesap türünü seç, iki kutuyu doldur. Küçük sayılar için 1e-5 biçimini kullanabilirsin.</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; max-width: 340px;">
+            <select id="dg-mode" class="sim-select" onchange="setDengeMode()">
+              <option value="ka">Kuvvetli asit pH</option>
+              <option value="kb">Kuvvetli baz pH</option>
+              <option value="za">Zayıf asit pH (Ka ile)</option>
+              <option value="zb">Zayıf baz pH (Kb ile)</option>
+              <option value="kcc">Kçç → molar çözünürlük (S)</option>
+            </select>
+            <input type="number" step="any" id="dg-a" class="sim-input" placeholder="Asit derişimi (M)">
+            <input type="number" step="any" id="dg-b" class="sim-input" placeholder="H⁺ sayısı (HCl: 1, H₂SO₄: 2)">
+            <button class="sim-btn" onclick="runDengeSim()">Hesapla</button>
+            <button class="sim-btn" style="background:#ef4444;" onclick="clearDengeSim()">Temizle</button>
+          </div>
+          <div id="dengeSimOutput" style="margin-top: 20px; font-size:1.05rem; line-height:1.7;"></div>
         </div>
       </div>
 
@@ -661,6 +740,36 @@
         { q: "Zıt yüklü iyon, aynı yüklü iyon ve bağ kopmalı tepkimelerin hız sıralaması?", a: "Zıt yüklü iyon tepkimeleri (çok hızlı) > aynı yüklü iyonlar (orta) > bağ kopması ve oluşması gerektirenler (yavaş)." },
         { q: "Sıcaklık artışı nelere neden olur? Neyi değiştirmez?", a: "Ortalama kinetik enerji, aktifleşme enerjisine ulaşan tanecik sayısı, etkin çarpışma sayısı ve k artar. Ea ve mekanizma değişmez." },
         { q: "Katalizör neyi değiştirir, neyi değiştirmez?", a: "Ea(ileri) ve Ea(geri)'yi aynı oranda düşürür; hızı ve k'yı artırır. ΔH, verim, tepkimenin yönü ve sıcaklık değişmez." }
+      ],
+      denge: [
+        { q: "Dinamik denge nedir?", a: "Birbirinin tersi iki olayın zıt yönlerde, eşit zaman aralığında ve aynı hızda gerçekleşmesidir. Denge anında TH(ileri) = TH(geri)." },
+        { q: "Denge tepkimelerindeki iki eğilim nedir?", a: "Maksimum düzensizlik ve minimum enerjili olma. Genellikle ters yöndedirler; NH₃(suda) + H₂O ⇌ NH₄⁺ + OH⁻ gibi bazı tepkimelerde aynı yöndedirler." },
+        { q: "Dengenin kurulma şartları nelerdir?", a: "Sıcaklık sabit, tersinir olay, tüm maddeler kapta, gaz varsa kap kapalı. Mikro olaylar sürer, makro olaylar durur, derişimler sabittir." },
+        { q: "Denge anında derişimler eşit midir?", a: "Hayır. Derişimler sabittir ama birbirine eşit olmak zorunda değildir." },
+        { q: "Homojen ve heterojen denge farkı?", a: "Homojen: tüm maddeler aynı fiziksel halde. Heterojen: en az bir madde farklı fiziksel halde." },
+        { q: "Denge bağıntısına hangi maddeler yazılır?", a: "Yalnızca gaz ve sulu çözelti maddeleri. Katı ve saf sıvılar yazılmaz. Mekanizmalıda net tepkimeye göre yazılır." },
+        { q: "Kp ile Kc arasındaki bağıntı?", a: "Kp = Kc(RT)^Δn; Δn = gaz ürün mol − gaz giren mol. Δn = 0 ise Kp = Kc." },
+        { q: "Tepkime ters çevrilince, bir sayıyla çarpılınca, toplanınca Kc?", a: "Ters: 1/Kc. n ile çarpma: Kc^n. Toplama: Kc'ler çarpılır." },
+        { q: "Qc nedir, Kc ile karşılaştırılınca ne söyler?", a: "Anlık derişimlerle bulunan denge kesridir. Qc = Kc denge. Qc > Kc girenlere, Qc < Kc ürünlere kayar." },
+        { q: "Kc'yi değiştiren tek faktör nedir?", a: "Sıcaklık. Derişim, hacim, basınç ve katalizör Kc'yi değiştirmez." },
+        { q: "Hacim artarsa denge nereye kayar?", a: "Basınç düşer; denge gaz mol sayısı çok olan tarafa kayar. Gaz mol sayıları eşitse etkilemez." },
+        { q: "Sabit hacimli ve sabit basınçlı kapta inert gaz eklenirse?", a: "Sabit hacim: kısmi basınçlar değişmez, denge bozulmaz. Sabit basınç: hacim artar, denge gaz mol sayısı çok olan tarafa kayar." },
+        { q: "Endotermik ve ekzotermik tepkimede sıcaklık artarsa Kc?", a: "Endotermikte Kc artar (ürünlere kayar), ekzotermikte Kc azalır (girenlere kayar). İki yönde de hız artar." },
+        { q: "Katalizör dengeyi etkiler mi?", a: "Hayır. Dengeye daha hızlı ulaştırır, ki ve kg'yi aynı oranda artırır; Kc ve derişimler değişmez." },
+        { q: "Çözünürlük ile Kçç arasındaki bağıntılar?", a: "BaSO₄: S². PbI₂: 4S³. Fe(OH)₃: 27S⁴. X₂Y₃: 108S⁵." },
+        { q: "Ortak iyon etkisi çözünürlüğü nasıl etkiler?", a: "Çözünürlüğü azaltır; Kçç değişmez. Ortak iyon derişimi büyüdükçe çözünürlük daha çok azalır." },
+        { q: "Endotermik ve ekzotermik çözünmede sıcaklığın etkisi?", a: "Endotermikte sıcaklık artınca çözünürlük ve Kçç artar; ekzotermikte ikisi de azalır." },
+        { q: "Hangi metaller amfoterdir?", a: "Be, Al, Zn, Cr, Pb, Sn. Oksitleri de amfoterdir; asitlere karşı baz, bazlara karşı asit gibi davranırlar." },
+        { q: "Asidik ve nötr ametal oksit nasıl ayrılır?", a: "O sayısı > ametal sayısıysa asidik (CO₂, SO₃, N₂O₅); O ≤ A ise nötr (NO, CO, N₂O)." },
+        { q: "Cam ve porselene etki eden asit hangisidir?", a: "HF. SiO₂ + 4HF → SiF₄ + 2H₂O." },
+        { q: "Ksu ve pH + pOH?", a: "Ksu = [H⁺][OH⁻] = 10⁻¹⁴ (25°C); pH + pOH = 14. Sıcaklıkla Ksu değişir." },
+        { q: "Ka × Kb ne verir?", a: "Konjuge asit–baz çiftinde Ka × Kb = Ksu = 10⁻¹⁴ (25°C)." },
+        { q: "Asitlik sıralamaları (HX ve HXOn)?", a: "HI > HBr > HCl > HF. HClO₄ > HClO₃ > HClO₂ > HClO (O sayısı artınca asitlik artar)." },
+        { q: "Zayıf asitte [H⁺] nasıl bulunur?", a: "[H⁺] = √(Ka·C) (x çok küçükse 1−x ≈ 1 alınır). Zayıf bazda [OH⁻] = √(Kb·C)." },
+        { q: "Tam nötrleşmede ortamın pH’ı nasıl belirlenir?", a: "Artan yoksa tuz belirler: KA+KB nötr (7), KA+ZB asidik (<7), ZA+KB bazik (>7)." },
+        { q: "Kısmi nötrleşmede pH nasıl hesaplanır?", a: "Artan asit veya bazın molü toplam hacme bölünür ([H⁺] veya [OH⁻]). Artan zayıf baz/asit varsa tampon çözeltidir." },
+        { q: "Tampon çözelti nedir? Örnekler?", a: "Zayıf asit+eşlenik bazı veya zayıf baz+eşlenik asidi içeren çözelti. HF–NaF, CH₃COOH–CH₃COONa, NH₃–NH₄Br. Az asit/baz pH’ı değiştirmez." },
+        { q: "Hidroliz nedir, hangi tuz hidroliz olur?", a: "Nötr olmayan tuzun zayıf iyonunun su ile verdiği denge tepkimesi. Nötr tuzlar hidroliz olmaz. F⁻ + H₂O ⇌ HF + OH⁻" }
       ]
     };
 
@@ -828,6 +937,68 @@
         { question: "11. 2CO(g) + O₂(g) → 2CO₂(g) tepkimesinde 14 g CO'nun yanması 20 saniye sürüyor. Normal koşullarda CO₂'nin oluşma hızı kaç L/s'dir? (CO: 28 g/mol)",
           options: ["A) 0,28","B) 0,56","C) 1,12","D) 5,6","E) 11,2"],
           ans: 1, sol: "14 g CO = 0,5 mol → 0,5 mol CO₂ oluşur = 11,2 L (NK). Hız = 11,2/20 = 0,56 L/s." }
+      ],
+      denge: [
+        { question: "1. Kimyasal denge ile ilgili aşağıdakilerden hangisi YANLIŞTIR?",
+          options: ["A) Sıcaklık sabittir.","B) İleri ve geri tepkime hızları eşittir.","C) Gaz varsa kap kapalıdır.","D) Maddelerin derişimleri birbirine eşittir.","E) Mikro olaylar devam eder."],
+          ans: 3, sol: "Denge anında derişimler sabittir, birbirine eşit olmak zorunda değildir." },
+        { question: "2. N₂(g) + 3H₂(g) ⇌ 2NH₃(g) tepkimesi için K_c ile K_p arasındaki bağıntı aşağıdakilerden hangisidir?",
+          options: ["A) K_p = K_c","B) K_c = K_p(RT)²","C) K_p = K_c(RT)²","D) K_c = K_p(RT)⁻²","E) K_p = K_c·RT"],
+          ans: 1, sol: "Δn = 2 − 4 = −2. K_p = K_c(RT)⁻² → K_c = K_p(RT)²." },
+        { question: "3. N₂(g) + O₂(g) ⇌ 2NO(g) tepkimesinin K_c değeri 0,1 ise 4NO(g) ⇌ 2N₂(g) + 2O₂(g) tepkimesinin K_c değeri kaçtır?",
+          options: ["A) 0,01","B) 10","C) 20","D) 100","E) 0,2"],
+          ans: 3, sol: "Ters çevirince 1/0,1 = 10; 2 ile çarpınca (10)² = 100." },
+        { question: "4. Fe₂O₃(k) + 3CO(g) ⇌ 2Fe(k) + 3CO₂(g) tepkimesi 2 L’lik kapta dengedeyken 0,1 mol Fe₂O₃, 0,2 mol CO, 0,2 mol Fe ve 0,4 mol CO₂ vardır. K_c kaçtır?",
+          options: ["A) 2","B) 4","C) 8","D) 16","E) 0,125"],
+          ans: 2, sol: "Katılar yazılmaz: K_c = [CO₂]³/[CO]³ = (0,2)³/(0,1)³ = 8." },
+        { question: "5. Sabit hacimli kapta 2SO₂(g) + O₂(g) ⇌ 2SO₃(g) dengesinde kısmi basınçlar SO₂: 1,2 atm, O₂: 0,4 atm, SO₃: 1,2 atm’dir. K_p kaçtır?",
+          options: ["A) 0,4","B) 1,2","C) 2,5","D) 3","E) 5"],
+          ans: 2, sol: "K_p = P(SO₃)²/(P(SO₂)²·P(O₂)) = 1,44/(1,44·0,4) = 2,5." },
+        { question: "6. PCl₅(g) ⇌ PCl₃(g) + Cl₂(g) tepkimesi 1 L’lik kapta 2 mol PCl₅ ile başlıyor. Dengede PCl₅’in %60’ı ayrışmışsa K_c kaçtır?",
+          options: ["A) 0,6","B) 1,2","C) 1,8","D) 2,4","E) 3,6"],
+          ans: 2, sol: "Ayrışan 1,2 mol: PCl₅ = 0,8; PCl₃ = Cl₂ = 1,2 mol/L. K_c = 1,2·1,2/0,8 = 1,8." },
+        { question: "7. 3X(g) + Y(g) ⇌ Z(k) + 2T(g) dengesine sabit sıcaklıkta Y gazı eklenirse hangisi YANLIŞTIR?",
+          options: ["A) Denge ürünlere kayar.","B) Z katısının miktarı artar.","C) X’in derişimi azalır.","D) T’nin derişimi artar.","E) K_c artar."],
+          ans: 4, sol: "Derişim değişimi K_c’yi değiştirmez; K_c yalnızca sıcaklıkla değişir." },
+        { question: "8. N₂(g) + 3H₂(g) ⇌ 2NH₃(g) dengesinde sabit sıcaklıkta kabın hacmi artırılırsa hangisi doğrudur?",
+          options: ["A) Denge ürünlere kayar.","B) K_c artar.","C) Tüm gazların derişimi azalır, denge girenlere kayar.","D) Toplam basınç artar.","E) Denge değişmez."],
+          ans: 2, sol: "V artınca P azalır; denge gaz mol sayısı çok olan girenlere kayar. Tüm derişimler azalır, K_c değişmez." },
+        { question: "9. 2SO₂(g) + O₂(g) ⇌ 2SO₃(g) + ısı dengesinde sıcaklık artırılırsa hangisi doğrudur?",
+          options: ["A) İleri tepkime hızı azalır.","B) K_c artar.","C) Denge girenlere kayar, K_c azalır.","D) Geri tepkime hızı azalır.","E) Denge değişmez."],
+          ans: 2, sol: "Ekzotermik tepkimede sıcaklık artınca denge girenlere kayar ve K_c azalır; her iki yönde hız artar." },
+        { question: "10. N₂ + 3H₂ ⇌ 2NH₃ (K_c = 16) tepkimesinde 4 L’lik kapta 1,2 mol N₂, 1,6 mol H₂ ve 2,4 mol NH₃ vardır. Sistem için hangisi doğrudur?",
+          options: ["A) Dengededir.","B) Q_c < K_c, ürünlere kayar.","C) Q_c > K_c, girenlere kayar.","D) Q_c = 0","E) Q_c = 16"],
+          ans: 2, sol: "Q_c = (0,6)²/(0,3·0,4³) = 0,36/0,0192 = 18,75 > 16 → dengede değildir, girenlere kayar." },
+        { question: "11. H₂(g) + I₂(g) ⇌ 2HI(g) dengesinde 2 L’lik kapta 2 mol H₂, 2 mol I₂ ve 4 mol HI vardır. Aynı sıcaklıkta kaba 1 mol HI eklenip yeniden dengeye gelince H₂’nin mol sayısı kaç olur?",
+          options: ["A) 1,75","B) 2","C) 2,25","D) 2,5","E) 3"],
+          ans: 2, sol: "K_c = (4/2)²/((1)(1)) = 4. x kadar HI harcanırsa: (5−2x)²/(2+x)² = 4 → 5−2x = 2(2+x) → x = 0,25 → H₂ = 2,25 mol." },
+        { question: "12. BaF₂ katısının K_çç değeri 3,2·10⁻¹¹’dir. Saf sudaki molar çözünürlüğü kaç M’dır?",
+          options: ["A) 2·10⁻⁴","B) 4·10⁻⁴","C) 8·10⁻⁴","D) 2·10⁻⁵","E) 4·10⁻⁶"],
+          ans: 0, sol: "K_çç = 4S³ = 3,2·10⁻¹¹ → S³ = 8·10⁻¹² → S = 2·10⁻⁴ M." },
+        { question: "13. CuS’ün K_çç değeri 4·10⁻⁸’dir. 0,1 M Cu(NO₃)₂ çözeltisindeki çözünürlüğü kaç M’dır?",
+          options: ["A) 2·10⁻⁴","B) 4·10⁻⁷","C) 4·10⁻⁸","D) 2·10⁻⁷","E) 4·10⁻⁹"],
+          ans: 1, sol: "Ortak iyon [Cu²⁺] = 0,1 M: 0,1·x = 4·10⁻⁸ → x = 4·10⁻⁷ M." },
+        { question: "14. Doygun AgCl çözeltisine (dipte katısı var) NaCl katısı eklenirse hangisi doğrudur?",
+          options: ["A) AgCl’nin çözünürlüğü artar.","B) K_çç artar.","C) [Ag⁺] azalır, AgCl katısı artar.","D) Denge ürünlere kayar.","E) [Cl⁻] azalır."],
+          ans: 2, sol: "Ortak iyon Cl⁻ artar, denge girenlere kayar, AgCl katısı artar, [Ag⁺] azalır. K_çç değişmez, çözünürlük azalır." },
+        { question: "15. 25°C’de 0,005 M Ba(OH)₂ çözeltisinin pH’ı kaçtır?",
+          options: ["A) 2","B) 10","C) 11,7","D) 12","E) 13"],
+          ans: 3, sol: "[OH⁻] = 2·0,005 = 0,01 M → pOH = 2 → pH = 12." },
+        { question: "16. 25°C’de HCN’nin K_a değeri 10⁻⁹’dur. Konjugesi CN⁻’nin K_b değeri kaçtır?",
+          options: ["A) 10⁻⁵","B) 10⁻⁷","C) 10⁻⁹","D) 10⁻¹⁴","E) 10⁻²³"],
+          ans: 0, sol: "K_a·K_b = K_su = 10⁻¹⁴ → K_b = 10⁻¹⁴/10⁻⁹ = 10⁻⁵." },
+        { question: "17. Aşağıdaki asitlik sıralamalarından hangisi doğrudur?",
+          options: ["A) HF > HCl > HBr > HI","B) HI > HBr > HCl > HF","C) HClO > HClO₂ > HClO₃ > HClO₄","D) CH₃COOH > HCOOH","E) HF > HI"],
+          ans: 1, sol: "Halojen asitlerinde asitlik HI > HBr > HCl > HF; oksijenli asitlerde HClO₄ en kuvvetlidir; organik asitlerde C sayısı artınca asitlik azalır." },
+        { question: "18. HF(suda) ile NaOH(suda) tam nötrleşirse oluşan çözeltinin pH’ı hakkında hangisi doğrudur?",
+          options: ["A) pH = 7","B) pH < 7","C) pH > 7","D) pH = 0","E) Belirlenemez"],
+          ans: 2, sol: "ZA + KB → bazik tuz (NaF). F⁻ hidroliz olur: F⁻ + H₂O ⇌ HF + OH⁻, pH > 7." },
+        { question: "19. 0,2 M 100 mL HCl ile 0,1 M 100 mL NaOH karıştırılıyor. Çözeltinin pH’ı kaçtır? (log5 = 0,7)",
+          options: ["A) 0,7","B) 1","C) 1,3","D) 2","E) 7"],
+          ans: 2, sol: "n(H⁺) = 0,02, n(OH⁻) = 0,01 → 0,01 mol H⁺ artar. [H⁺] = 0,01/0,2 = 5·10⁻² → pH = 2 − 0,7 = 1,3." },
+        { question: "20. Aşağıdakilerden hangisi bir tampon çözeltidir?",
+          options: ["A) HCl – NaCl","B) HNO₃ – KNO₃","C) HF – NaF","D) NaOH – NaCl","E) H₂SO₄ – Na₂SO₄"],
+          ans: 2, sol: "Tampon, zayıf asit ile onun eşlenik bazını içeren tuzdan oluşur: HF – NaF." }
       ]
     };
 
@@ -842,7 +1013,13 @@
       });
     }
 
+    function toggleMenu(open) {
+      var o = (typeof open === 'boolean') ? open : !document.body.classList.contains('menu-open');
+      document.body.classList.toggle('menu-open', o);
+    }
+
     function changeTopic(id, title, btn) {
+      toggleMenu(false);
       currentTopic = id;
       document.querySelectorAll('.topic-btn').forEach(function (b) { b.classList.remove('active'); });
       if (btn) btn.classList.add('active');
@@ -1021,6 +1198,36 @@
       var f = Math.pow(a, m) * Math.pow(b, n), d = m + n, u;
       if (d === 1) u = '1/s'; else if (d === 0) u = 'mol/L·s'; else if (d === 2) u = 'L/mol·s'; else u = 'L^' + (d - 1) + ' / (mol^' + (d - 1) + '·s)';
       out.innerHTML = 'Hız <span class="highlight-green">' + (Math.round(f * 10000) / 10000) + ' katına</span> çıkar.<br>Tepkime derecesi: ' + d + ' → k birimi: ' + u;
+    }
+
+    // --- Denge / asit-baz simülatörü ---
+    function setDengeMode() {
+      var m = document.getElementById('dg-mode').value, a = document.getElementById('dg-a'), b = document.getElementById('dg-b');
+      var ph = { ka: ['Asit derişimi (M)', 'H⁺ sayısı (HCl: 1, H₂SO₄: 2)'], kb: ['Baz derişimi (M)', 'OH⁻ sayısı (NaOH: 1, Ba(OH)₂: 2)'], za: ['Zayıf asit derişimi (M)', 'Ka (örn. 1e-5)'], zb: ['Zayıf baz derişimi (M)', 'Kb (örn. 1e-5)'], kcc: ['Kçç (örn. 3.2e-11)', 'İyon sayıları: katyon,anyon (PbI₂ için 1,2)'] };
+      a.placeholder = ph[m][0]; b.placeholder = ph[m][1]; b.type = m === 'kcc' ? 'text' : 'number'; b.value = '';
+    }
+    function clearDengeSim() {
+      document.getElementById('dg-a').value = ''; document.getElementById('dg-b').value = '';
+      document.getElementById('dengeSimOutput').innerHTML = '';
+    }
+    function runDengeSim() {
+      var m = document.getElementById('dg-mode').value, a = parseFloat(document.getElementById('dg-a').value), bs = document.getElementById('dg-b').value;
+      var out = document.getElementById('dengeSimOutput');
+      if (!(a > 0)) { out.innerHTML = '<span class="highlight-red">Birinci kutuya sıfırdan büyük bir değer gir.</span>'; return; }
+      if (m === 'kcc') {
+        var p = bs.split(','), x = parseFloat(p[0]), y = parseFloat(p[1]);
+        if (!(x > 0) || !(y > 0)) { out.innerHTML = '<span class="highlight-red">İyon sayılarını "1,2" biçiminde gir.</span>'; return; }
+        var s = Math.pow(a / (Math.pow(x, x) * Math.pow(y, y)), 1 / (x + y));
+        out.innerHTML = 'K<sub>çç</sub> = ' + (Math.pow(x, x) * Math.pow(y, y)) + '·S<sup>' + (x + y) + '</sup><br>S = <span class="highlight-green">' + s.toExponential(2) + ' M</span>';
+        return;
+      }
+      var b = parseFloat(bs);
+      if (!(b > 0)) { out.innerHTML = '<span class="highlight-red">İkinci kutuya sıfırdan büyük bir değer gir.</span>'; return; }
+      var conc, isAcid = (m === 'ka' || m === 'za'), note = '';
+      if (m === 'ka' || m === 'kb') conc = a * b;
+      else { conc = Math.sqrt(a * b); if (conc / a > 0.05) note = '<br><small style="color:var(--text-muted)">Uyarı: iyonlaşma %5’ten büyük, 1−x ≈ 1 yaklaşımı zayıf kalabilir.</small>'; }
+      var pX = -Math.log10(conc), pH = isAcid ? pX : 14 - pX, pOH = 14 - pH;
+      out.innerHTML = (isAcid ? '[H⁺]' : '[OH⁻]') + ' = ' + conc.toExponential(2) + ' M<br>pH = <span class="highlight-green">' + pH.toFixed(2) + '</span>, pOH = ' + pOH.toFixed(2) + '<br>Ortam: ' + (pH < 7 ? 'asidik' : pH > 7 ? 'bazik' : 'nötr') + (m === 'za' || m === 'zb' ? '<br>Yüzde iyonlaşma: ' + (conc / a * 100).toFixed(2) + '%' : '') + note;
     }
 
     // --- Başlangıç ---
